@@ -78,3 +78,61 @@ if (tgScrollEl) {
   function tgLoop() { tgAddMessage(); }
   tgLoop();
 }
+
+// ── GESTIONE CONSENSO COOKIE ──
+(function () {
+  const CONSENT_KEY = 'mago_fut_cookie_consent';
+
+  function loadAnalytics() {
+    if (!window.GA_MEASUREMENT_ID || window.__gaLoaded) return;
+    window.__gaLoaded = true;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.GA_MEASUREMENT_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', window.GA_MEASUREMENT_ID);
+  }
+
+  function getConsent() {
+    try { return localStorage.getItem(CONSENT_KEY); } catch (e) { return null; }
+  }
+  function setConsent(value) {
+    try { localStorage.setItem(CONSENT_KEY, value); } catch (e) {}
+  }
+
+  function showBanner() {
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.style.display = 'flex';
+  }
+  function hideBanner() {
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.style.display = 'none';
+  }
+
+  // Espone una funzione globale per riaprire il banner (usata dalla pagina Cookie Policy)
+  window.reopenCookieBanner = function () {
+    showBanner();
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const consent = getConsent();
+    if (consent === 'accepted') {
+      loadAnalytics();
+    } else if (consent !== 'rejected') {
+      showBanner();
+    }
+
+    const acceptBtn = document.getElementById('cookieAccept');
+    const rejectBtn = document.getElementById('cookieReject');
+    if (acceptBtn) acceptBtn.addEventListener('click', function () {
+      setConsent('accepted');
+      loadAnalytics();
+      hideBanner();
+    });
+    if (rejectBtn) rejectBtn.addEventListener('click', function () {
+      setConsent('rejected');
+      hideBanner();
+    });
+  });
+})();
