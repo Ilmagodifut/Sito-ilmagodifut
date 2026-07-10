@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /grazie.html
+Disallow: /grazie-wl-rivals.html
+
+Sitemap: https://ilmagodifut.com/sitemap.xml
