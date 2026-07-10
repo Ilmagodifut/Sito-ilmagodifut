@@ -653,6 +653,7 @@ footer {
 .social-btn svg { width: 18px; height: 18px; }
 .social-btn:hover { border-color: var(--green); box-shadow: 0 0 14px var(--green-glow2); transform: translateY(-1px); }
 .footer-copy { width: 100%; text-align: center; color: var(--text-muted); font-size: 0.75rem; border-top: 1px solid var(--border-dim); padding-top: 1.5rem; margin-top: 0.5rem; }
+.footer-seo-line { width: 100%; text-align: center; color: #555; font-size: 0.68rem; line-height: 1.6; max-width: 640px; margin: 0.75rem auto 0; }
 
 /* ── SCROLL REVEAL ── */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
