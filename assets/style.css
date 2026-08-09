@@ -111,12 +111,6 @@ nav {
   pointer-events: none;
 }
 
-/* FUT field lines decoration */
-.hero-field {
-  position: absolute; bottom: 44px; left: 50%; transform: translateX(-50%);
-  width: 900px; height: 220px; pointer-events: none; opacity: 0.07;
-}
-
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 0.6rem;
   border: 1px solid rgba(57,255,20,0.35);
@@ -156,23 +150,10 @@ nav {
   filter: drop-shadow(0 0 22px rgba(57,255,20,0.45));
 }
 
-.hero-elite {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(1.4rem, 4vw, 2.8rem);
-  font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--green); margin-bottom: 2rem;
-  position: relative; display: inline-block;
-}
 .hero-elite::before, .hero-elite::after {
   content: '—';
   color: var(--green-dim); margin: 0 0.8rem;
   font-size: 0.7em; vertical-align: middle;
-}
-
-.hero-sub {
-  font-size: clamp(0.95rem, 2vw, 1.1rem);
-  color: var(--text-muted); max-width: 500px;
-  line-height: 1.75; margin: 0 auto 2.5rem;
 }
 
 /* ── HERO HOOK (multi-line punchy copy) ── */
@@ -229,27 +210,7 @@ nav {
 }
 .hero-stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.08em; }
 
-/* ── TICKER ── */
-.ticker-bar {
-  position: relative; z-index: 2;
-  overflow: hidden; height: 42px;
-  background: rgba(57,255,20,0.05);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-}
-.ticker-inner {
-  display: flex; gap: 4rem;
-  animation: scroll-ticker 32s linear infinite;
-  white-space: nowrap;
-}
-.ticker-item {
-  font-family: 'Rajdhani', sans-serif; font-size: 0.82rem;
-  font-weight: 600; letter-spacing: 0.07em; color: var(--text-muted);
-}
 .ticker-item .up { color: var(--green); }
-.ticker-item .dn { color: #FF4444; }
-.ticker-label { color: var(--text); }
 @keyframes scroll-ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
 /* ── PROBLEM ── */
@@ -282,46 +243,14 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
 .section-title .g { color: var(--green); }
 .section-desc { color: var(--text-muted); max-width: 500px; line-height: 1.75; font-size: 0.95rem; }
 
-/* ── ELITE BANNER ── */
-.elite-banner {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 2.5rem 3rem;
-  margin-bottom: 5rem;
-  display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
-  position: relative; overflow: hidden;
-}
 .elite-banner::before {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
   background: var(--green);
   box-shadow: 0 0 20px var(--green-glow);
 }
-.elite-banner-logo {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 3.5rem; font-weight: 700; line-height: 1;
-  flex-shrink: 0;
-}
 .elite-banner-logo .g { color: var(--green); text-shadow: 0 0 30px rgba(57,255,20,0.5); }
-.elite-banner-text h2 {
-  font-family: 'Rajdhani', sans-serif; font-size: 1.6rem;
-  font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.4rem;
-}
 .elite-banner-text p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
-.elite-pill {
-  margin-left: auto; text-align: center; flex-shrink: 0;
-}
-.elite-pill-inner {
-  background: rgba(57,255,20,0.08); border: 1px solid rgba(57,255,20,0.3);
-  border-radius: 10px; padding: 1rem 1.5rem;
-}
-.elite-pill-name {
-  font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700;
-  color: var(--green); letter-spacing: 0.12em; line-height: 1;
-  text-shadow: 0 0 20px rgba(57,255,20,0.4);
-}
-.elite-pill-sub { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.3rem; }
 
 /* ── CARDS SERVIZI ── */
 .servizi-grid {
@@ -364,13 +293,6 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
   padding: 3px 8px; border-radius: 3px;
 }
 
-/* ── PROMO ── */
-.promo-wrap {
-  background: var(--surface);
-  border: 1px solid rgba(57,255,20,0.25);
-  border-radius: 14px; overflow: hidden;
-  position: relative;
-}
 .promo-wrap::before {
   content: 'SEASON PASS ELITE';
   position: absolute; top: 1.5rem; right: 1.8rem;
@@ -378,59 +300,21 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em;
   color: var(--green-dim);
 }
-.promo-inner {
-  display: flex; align-items: stretch; flex-wrap: wrap;
-}
-.promo-content {
-  flex: 1; min-width: 280px; padding: 3rem;
-  border-right: 1px solid rgba(57,255,20,0.1);
-}
 .promo-content h2 {
   font-family: 'Rajdhani', sans-serif;
   font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
   line-height: 1.05; margin-bottom: 1.5rem;
 }
-.promo-content h2 .g { color: var(--green); }
-.promo-features { list-style: none; margin-bottom: 2rem; }
 .promo-features li {
   display: flex; align-items: flex-start; gap: 0.75rem;
   font-size: 0.9rem; color: var(--text-muted); padding: 0.6rem 0;
   border-bottom: 1px solid var(--border-dim);
 }
-.promo-features li:last-child { border-bottom: none; }
 .promo-features li .check { color: var(--green); font-size: 0.85rem; flex-shrink: 0; margin-top: 2px; }
-.promo-note { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
 .promo-note a { color: var(--green); text-decoration: none; }
 
-.promo-price-col {
-  min-width: 240px; padding: 3rem 2.5rem;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 0.75rem;
-  background: rgba(57,255,20,0.03);
-}
-.promo-badge {
-  background: rgba(57,255,20,0.1); border: 1px solid rgba(57,255,20,0.25);
-  color: var(--green); border-radius: 100px; padding: 0.3rem 1rem;
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-}
-.promo-price {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 5rem; font-weight: 700; color: var(--green); line-height: 1;
-  text-shadow: 0 0 30px rgba(57,255,20,0.4);
-}
 .promo-price sup { font-size: 2rem; vertical-align: top; margin-top: 0.8rem; }
-.promo-period { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.04em; margin-top: -0.5rem; }
-.promo-cta {
-  background: var(--green); color: #000;
-  padding: 1rem 2rem; border-radius: 6px;
-  font-family: 'Rajdhani', sans-serif; font-weight: 700;
-  font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase;
-  text-decoration: none; display: block; width: 100%;
-  box-shadow: 0 0 24px var(--green-glow);
-  transition: box-shadow 0.2s;
-}
 .promo-cta:hover { box-shadow: 0 0 36px rgba(57,255,20,0.45); }
-.promo-secure { font-size: 0.72rem; color: var(--text-muted); }
 
 /* ── PRICING TIERS ── */
 .pricing-intro { text-align: center; max-width: 600px; margin: 0 auto 3rem; }
@@ -561,27 +445,6 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
 .faq-item.open .faq-a { max-height: 200px; }
 .faq-a-inner { padding-bottom: 1.4rem; }
 
-/* ── REVIEWS ── */
-.reviews-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem; margin-top: 3rem;
-}
-.review-card {
-  background: var(--surface); border: 1px solid var(--border-dim);
-  border-radius: 10px; padding: 1.5rem;
-}
-.review-stars { color: var(--green); font-size: 0.85rem; margin-bottom: 0.75rem; letter-spacing: 0.1em; }
-.review-text { font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.1rem; }
-.review-author { display: flex; align-items: center; gap: 0.75rem; }
-.review-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(57,255,20,0.1); border: 1px solid rgba(57,255,20,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--green);
-}
-.review-name { font-size: 0.85rem; font-weight: 600; }
-.review-sub { font-size: 0.72rem; color: var(--text-muted); }
-
 /* ── CTA FINALE ── */
 .cta-box {
   background: var(--surface);
@@ -597,13 +460,7 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
   background: radial-gradient(ellipse, rgba(57,255,20,0.1) 0%, transparent 70%);
   pointer-events: none;
 }
-.cta-brand {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 700;
-  line-height: 1; margin-bottom: 0.3rem;
-}
 .cta-brand .g { color: var(--green); text-shadow: 0 0 30px rgba(57,255,20,0.5); }
-.cta-sub { color: var(--text-muted); max-width: 420px; margin: 0 auto 2rem; line-height: 1.7; font-size: 0.95rem; }
 .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
 /* Variante compatta orizzontale (bassa e larga) */
@@ -653,7 +510,7 @@ footer {
 .social-btn svg { width: 18px; height: 18px; }
 .social-btn:hover { border-color: var(--green); box-shadow: 0 0 14px var(--green-glow2); transform: translateY(-1px); }
 .footer-copy { width: 100%; text-align: center; color: var(--text-muted); font-size: 0.75rem; border-top: 1px solid var(--border-dim); padding-top: 1.5rem; margin-top: 0.5rem; }
-.footer-seo-line { width: 100%; text-align: center; color: #555; font-size: 0.68rem; line-height: 1.6; max-width: 640px; margin: 0.75rem auto 0; }
+.footer-seo-line { width: 100%; text-align: center; color: #808080; font-size: 0.68rem; line-height: 1.6; max-width: 640px; margin: 0.75rem auto 0; }
 
 /* ── SCROLL REVEAL ── */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
@@ -673,9 +530,6 @@ footer {
   .nav-mobile-panel { display: flex; }
   section { padding: 4rem 1.25rem; }
   .steps-grid { grid-template-columns: 1fr; gap: 3rem; }
-  .promo-content { border-right: none; border-bottom: 1px solid rgba(57,255,20,0.1); }
-  .elite-banner { padding: 2rem 1.5rem; }
-  .elite-pill { margin-left: 0; }
   .hero-stats { gap: 2rem; }
   .footer-inner { flex-direction: column; align-items: center; text-align: center; }
   .footer-links { flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.1rem; }
@@ -695,16 +549,6 @@ footer {
   font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.02em;
 }
 .page-header p { color: var(--text-muted); max-width: 560px; margin: 1rem auto 0; font-size: 0.95rem; line-height: 1.7; }
-
-/* ── ELITE TEASER (homepage) ── */
-.teaser-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem; margin: 2.5rem 0 2.5rem;
-}
-.teaser-card { border: 1px solid var(--border-dim); border-radius: 10px; padding: 1.75rem; background: var(--black2); }
-.teaser-card .icon-check { color: var(--green); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; display: block; }
-.teaser-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.65; }
-.teaser-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
 
 /* ── LANDING HERO ENTRANCE ANIMATION ── */
 .landing-hero { min-height: calc(100vh - 60px); display: flex; flex-direction: column; justify-content: center; }
