@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
-Disallow: /grazie.html
+Disallow: /grazie-mensile.html
+Disallow: /grazie-mini-pass.html
+Disallow: /grazie-season-pass.html
 Disallow: /grazie-wl-rivals.html
+Disallow: /grazie-gestione-account.html
 
 Sitemap: https://ilmagodifut.com/sitemap.xml
