@@ -1,0 +1,23 @@
+# FUTMAGO — senza queste intestazioni il segnalibro non parte:
+# la pagina di EA chiede questi file da un altro dominio.
+
+# E senza la riga di cache, un aggiornamento puo non arrivare mai.
+#
+# Sia il segnalibro sia lo userscript scaricano SEMPRE questo stesso
+# indirizzo, con un ?v= congelato al momento in cui l utente lo ha
+# copiato o installato. Il ?v= serve solo a rompere la cache: il percorso
+# e sempre l ultima versione, ed e per questo che nessuno deve rifare
+# niente quando pubblichiamo.
+#
+# Ma proprio perche quell indirizzo non cambia mai piu, se qualcuno lo
+# tiene in cache a lungo l utente resta inchiodato alla versione del
+# giorno in cui l ha installato -- e non se ne accorgerebbe. Finora ci
+# affidavamo al comportamento di difetto dell hosting: qui lo diciamo noi.
+/futmago.js
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache
+/futmago-*.js
+  Access-Control-Allow-Origin: *
+/futmago-api.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: max-age=300

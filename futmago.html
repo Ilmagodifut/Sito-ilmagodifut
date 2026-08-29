@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="FUTMAGO BETA: il risolutore di SBC per EA Sports FC26. Completa le Sfide Creazione Rosa con le carte che hai già nel club. Gratis durante la beta.">
+<meta name="robots" content="index, follow">
+<title>FUTMAGO BETA | Il Mago di FUT</title>
+<link rel="canonical" href="https://ilmagodifut.com/futmago">
+
+<!--
+  Icona propria di FUTMAGO: il maghetto sull'alone verde dell'animazione.
+
+  Su iPhone un collegamento aggiunto alla schermata Home prende l'immagine da
+  apple-touch-icon; senza, iOS disegna un quadrato grigio con l'iniziale --
+  la «F» che si vedeva. Il resto del sito tiene la sua icona: qui si cambia
+  soltanto questa pagina.
+
+  I due file arrivano da apps/extension/dist-sito/ insieme a futmago.js.
+-->
+<link rel="icon" type="image/png" sizes="32x32" href="/futmago-icona-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ilmagodifut.com/futmago">
+<meta property="og:title" content="FUTMAGO BETA — il risolutore di SBC per FC26">
+<meta property="og:description" content="Completa le SBC con le carte che hai già nel club. Desktop, iPhone e Android. Gratis durante la beta.">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="Il Mago di FUT ELITE">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+
+<style>
+  /* Solo cio' che il foglio del sito non ha gia'. Niente colori nuovi: le
+     variabili sono quelle di style.css. */
+  /*
+     Il pulsante di scaricamento sta dentro un passo della guida, e li' il
+     foglio del sito colora ogni collegamento di verde: .step-body a (0,1,1)
+     batte .btn-primary (0,1,0), e la scritta finiva verde su fondo verde --
+     invisibile. Misurato in anteprima: colore e sfondo entrambi rgb(57,255,20).
+
+     Si rimette il nero del pulsante con una specificita' che basta, e solo
+     qui: il foglio del sito non si tocca, e nessun'altra pagina cambia. */
+  .step-body a.btn-primary { color: #000; }
+
+  /*
+     La barra in alto si stringeva fino a toccarsi: fra 769px e circa 1150px
+     logo e prima voce combaciavano al pixel, e cosi' l'ultima voce con
+     INSTALLA FUTMAGO. Misurato a 1055px: distanza zero fra i due bordi.
+
+     Non e' un difetto del sito: la home ha cinque voci corte e sta larga fino
+     in fondo. Questa pagina ne ha sei, due lunghe ("Servizio WL/Rivals",
+     "Gestione Account") piu' "FUTMAGO", e il menu a panino del sito arriva
+     solo a 768px -- troppo tardi per una barra piu' lunga.
+
+     Si anticipa il passaggio al panino a 1180px, con le stesse classi e lo
+     stesso meccanismo del sito (il pannello resta chiuso finche' non prende
+     .open). Vale solo qui: e' il foglio di questa pagina, e nessun'altra
+     cambia.
+
+     NOTA PER CHI CURA IL SITO: quando "FUTMAGO" entrera' nella barra di
+     TUTTE le pagine, lo stesso pigiamento comparira' ovunque, e li' la
+     correzione va fatta una volta sola in style.css invece che pagina per
+     pagina. */
+  @media (max-width: 1180px) {
+    .nav-links, .nav-cta { display: none; }
+    .nav-mobile-btn { display: block; }
+    .nav-mobile-panel { display: flex; }
+  }
+
+  /* Le due schermate della guida iOS: affiancate se c'e' spazio, in colonna
+     sul telefono -- dove per altro la guida si legge piu' spesso. */
+  .fm-schermate { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                  gap: 1rem; margin: 1.2rem 0 0.4rem; }
+  .fm-schermate figure { margin: 0; }
+  .fm-schermate img { width: 100%; height: auto; display: block; border-radius: 10px;
+                      border: 1px solid rgba(57,255,20,0.18); background: #0d1117; }
+  .fm-schermate figcaption { margin-top: 0.5rem; font-size: 0.78rem; color: #9fb0c0; }
+  /* Il tasto da premere sta in una barra larga e bassa: in colonna con le
+     altre due si schiaccerebbe, quindi tiene una riga sua. */
+  .fm-schermata-larga { margin: 1.2rem 0 0; max-width: 380px; }
+  .fm-schermata-larga img { width: 100%; height: auto; display: block; border-radius: 10px;
+                            border: 1px solid rgba(57,255,20,0.18); background: #0d1117; }
+  .fm-schermata-larga figcaption { margin-top: 0.5rem; font-size: 0.78rem; color: #9fb0c0; }
+
+  .fm-piattaforme { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 3rem; }
+  .fm-tab-btn { cursor: pointer; }
+  .fm-guida { display: none; margin-top: 3rem; }
+  /*
+     Lo script del sito mette .reveal (opacity:0) su ogni figlio diretto di
+     .container, e la toglie quando l'elemento entra nel viewport. Le guide
+     nascono display:none, quindi non entrano mai finche' non le apri — e a
+     quel punto sarebbero visibili ma trasparenti. Qui l'effetto non serve: la
+     guida si apre perche' l'hai chiesta, non perche' ci sei arrivato
+     scorrendo. */
+  .fm-guida.aperta { display: block; opacity: 1; transform: none; }
+  .fm-avviso {
+    border-left: 3px solid var(--green);
+    background: rgba(57,255,20,0.05);
+    padding: 1.1rem 1.3rem; border-radius: 6px; margin: 2rem 0;
+    color: var(--text-muted); font-size: 0.9rem; line-height: 1.7;
+  }
+  .fm-avviso strong { color: var(--text); }
+  .fm-codice {
+    display: block; background: #0b0b0b; border: 1px solid var(--border-dim);
+    border-radius: 6px; padding: 0.9rem 1rem; margin-top: 0.8rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem; color: var(--green);
+    word-break: break-all; user-select: all; -webkit-user-select: all;
+  }
+  .fm-copia {
+    margin-top: 0.6rem; background: transparent; color: var(--green);
+    border: 1px solid rgba(57,255,20,0.3); border-radius: 5px;
+    padding: 0.45rem 0.9rem; font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+  }
+  .fm-copia:hover { border-color: var(--green); }
+  .fm-tabella { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: 0.88rem; }
+  .fm-tabella td { padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--border-dim); color: var(--text-muted); vertical-align: top; }
+  .fm-tabella td:first-child { color: var(--text); width: 42%; }
+  @media (max-width: 768px) { .fm-piattaforme { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class='nav-logo' href='/'>
+    Il <span class="mago">Mago</span> di FUT
+    <span class="elite-badge">ELITE</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#promo">Piani</a></li>
+    <li><a href='/servizi'>Servizi</a></li>
+    <li><a href='/chi-siamo'>Chi siamo</a></li>
+    <li><a href='/servizio-wl-rivals'>Servizio WL/Rivals</a></li>
+    <li><a href='/gestione-account'>Gestione Account</a></li>
+    <li><a href='/futmago'>FUTMAGO</a></li>
+  </ul>
+  <a class="nav-cta" href="#installa">Installa FUTMAGO</a>
+  <button class="nav-mobile-btn" aria-label="Apri menu" aria-expanded="false">☰</button>
+</nav>
+
+<div class="nav-mobile-panel" id="mobileMenu">
+  <a href="/#promo">Piani</a>
+  <a href='/servizi'>Servizi</a>
+  <a href='/chi-siamo'>Chi siamo</a>
+  <a href='/servizio-wl-rivals'>Servizio WL/Rivals</a>
+  <a href='/gestione-account'>Gestione Account</a>
+  <a href='/futmago'>FUTMAGO</a>
+  <a href="#installa" class="nav-cta" style="display:inline-block; margin-top: 0.5rem;">Installa FUTMAGO</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="eyebrow-dot"></span>
+    BETA aperta · EA Sports FC26 · gratis
+  </div>
+
+  <div class="hero-brand">Il Mago di FUT presenta</div>
+
+  <h1>
+    <span class="mago">FUT</span><span class="di-fut">MAGO</span>
+  </h1>
+
+  <div class="hero-elite">— IL RISOLUTORE DI SBC —</div>
+
+  <div class="hero-hook">
+    <p class="line-1">Le <span class="g">Sfide Creazione Rosa</span> si completano da sole, con le carte che hai <span class="g">già nel club</span>.</p>
+    <p class="line-2">Tu apri la SBC. FUTMAGO trova la rosa e riempie gli slot.</p>
+    <p class="line-3">Funziona su <span class="g">computer, iPhone e Android</span>, dentro la Web App di EA. Durante la beta è <span class="g">gratis e senza limiti</span>.</p>
+  </div>
+
+  <div class="hero-actions">
+    <a class="btn-primary" href="#installa">Installa FUTMAGO</a>
+    <a class="btn-secondary" href="#cosa-fa">Cosa fa</a>
+  </div>
+</section>
+
+<!-- ═══ COSA FA ═══ -->
+<section id="cosa-fa">
+  <div class="container">
+    <span class="section-label">Cosa fa</span>
+    <h2 class="section-title">Il lavoro noioso, <span class="g">fatto da lui</span></h2>
+    <p class="section-desc">Niente di magico e niente di vietato: FUTMAGO legge quello che la Web App ha già davanti e ti dice quali carte usare.</p>
+
+    <div class="servizi-grid">
+      <div class="card">
+        <div class="card-icon">🧙</div>
+        <h3>Risolve la SBC</h3>
+        <p>Apri una sfida, premi RISOLVI. FUTMAGO cerca la rosa che soddisfa tutti i requisiti — valutazione, nazione, lega, club, carte speciali — usando le carte che possiedi già.</p>
+        <span class="card-tag">Anche più soluzioni</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Completa un set intero</h3>
+        <p>COMPLETA TUTTE risolve tutte le sfide di un set, una per una. Ti mostra ogni rosa prima di inviarla: l'invio parte solo se lo confermi tu.</p>
+        <span class="card-tag">Con anteprima</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>Apre i pacchetti</h3>
+        <p>Apertura rapida senza animazione, o apertura di più pacchetti in fila. Le carte si smistano da sole: le nuove al club, i doppioni in archivio.</p>
+        <span class="card-tag">Con elenco finale</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h3>Non tocca il tuo account</h3>
+        <p>Nessun login, nessuna password, nessun accesso al tuo account EA. FUTMAGO gira dentro la pagina che hai già aperto tu, e le tue carte non escono dal tuo dispositivo.</p>
+        <span class="card-tag">Nessun account</span>
+      </div>
+    </div>
+
+    <div class="fm-avviso">
+      <strong>Cosa NON fa.</strong> Non compra carte al posto tuo, non gioca partite, non tocca i crediti,
+      non entra nel tuo account. Non invia mai una SBC senza che tu prema conferma.
+      E non ti mostra prezzi di mercato: quelli non li abbiamo verificati, e preferiamo non scriverli
+      piuttosto che scriverne di sbagliati.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INSTALLA ═══ -->
+<section id="installa">
+  <div class="container">
+    <span class="section-label">Installazione</span>
+    <h2 class="section-title">Scegli il tuo <span class="g">dispositivo</span></h2>
+    <p class="section-desc">Tre strade diverse, perché i browser sono diversi fra loro. Scegli il tuo e segui i passi.</p>
+
+    <div class="fm-piattaforme">
+      <div class="card fm-tab-btn" data-guida="desktop">
+        <div class="card-icon">💻</div>
+        <h3>Computer</h3>
+        <p>Chrome, Edge, Brave, Opera o Firefox su Windows e Mac. È la strada più semplice: si installa una volta e si aggiorna da solo.</p>
+        <span class="card-tag">Consigliata</span>
+      </div>
+      <div class="card fm-tab-btn" data-guida="iphone">
+        <div class="card-icon">📱</div>
+        <h3>iPhone e iPad</h3>
+        <p>Su Safari, con un segnalibro che si preme quando la Web App è aperta. Nessuna app da comprare.</p>
+        <span class="card-tag">2 minuti</span>
+      </div>
+      <div class="card fm-tab-btn" data-guida="android">
+        <div class="card-icon">🤖</div>
+        <h3>Android</h3>
+        <p>Con Firefox parte da solo, e si prepara una volta sola. Con Chrome serve il segnalibro, perché Chrome su Android non ha le estensioni.</p>
+        <span class="card-tag">2 strade</span>
+      </div>
+    </div>
+
+    <!-- ── DESKTOP ── -->
+    <div class="fm-guida aperta" id="guida-desktop">
+      <h2 class="section-title" style="font-size:1.8rem; margin-top:1rem;">Computer</h2>
+      <div class="steps" style="margin-top:2rem;">
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Scarica FUTMAGO</h3>
+            <p>Un file compresso da salvare sul computer. Scegli quello del tuo browser.</p>
+            <p style="margin-top:0.9rem;">
+              <a class="btn-primary" href="/futmago-chrome.zip" download>Per Chrome, Edge, Brave, Opera</a>
+              <a class="btn-secondary" href="/futmago-firefox.zip" download style="margin-left:0.6rem;">Per Firefox</a>
+            </p>
+            <p style="margin-top:0.9rem; font-size:0.82rem;">Poi estrai la cartella dal file e tienila dove non la cancellerai per sbaglio: l'estensione la legge da lì.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Caricala nel browser</h3>
+            <p><strong>Chrome, Edge, Brave, Opera:</strong> scrivi <code style="color:var(--green)">chrome://extensions</code> nella barra dell'indirizzo, accendi «Modalità sviluppatore» in alto a destra, premi «Carica estensione non pacchettizzata» e scegli la cartella estratta.</p>
+            <p style="margin-top:0.7rem;"><strong>Firefox:</strong> scrivi <code style="color:var(--green)">about:debugging#/runtime/this-firefox</code>, premi «Carica componente aggiuntivo temporaneo» e scegli il file <code>manifest.json</code> dentro la cartella.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Apri la Web App di EA</h3>
+            <p>Vai su <a href="https://www.ea.com/ea-sports-fc/ultimate-team/web-app/" target="_blank" rel="noopener">ea.com/ea-sports-fc/ultimate-team/web-app</a> ed entra col tuo account, come fai sempre.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">4</div></div>
+          <div class="step-body">
+            <h3>Cerca i pulsanti verdi</h3>
+            <p>Se FUTMAGO è attivo, accanto al nome della schermata compare la scritta <strong>FUTMAGO</strong>, e dentro una SBC trovi il pulsante verde fluo <strong>RISOLVI SBC</strong>. Se non lo vedi, ricarica la pagina.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="fm-avviso">
+        <strong>Perché questi passaggi a mano?</strong> Perché durante la beta FUTMAGO non è ancora sul
+        Chrome Web Store: la pubblicazione richiede una revisione che dura giorni, e non volevamo
+        farti aspettare. Quando sarà pubblicato basterà un clic, l'estensione si aggiornerà da sola
+        e questa pagina cambierà.
+        <br><br>
+        <strong>Su Firefox</strong> il caricamento temporaneo dura fino alla chiusura del browser:
+        va rifatto ogni volta. È una regola di Firefox per i componenti non firmati, non una nostra scelta.
+      </div>
+    </div>
+
+    <!-- ── IPHONE ── -->
+    <div class="fm-guida" id="guida-iphone">
+      <h2 class="section-title" style="font-size:1.8rem; margin-top:1rem;">iPhone e iPad</h2>
+      <p class="section-desc">Questi passaggi si fanno <strong>una volta sola</strong>. Dalla volta successiva FUTMAGO partirà sempre automaticamente.</p>
+
+      <div class="steps" style="margin-top:2rem;">
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Installa Userscripts</h3>
+            <p>Apri l'App Store e installa <strong>Userscripts</strong>. È gratuita.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Accendi Userscripts dalle impostazioni del tuo telefono</h3>
+            <p>Impostazioni &rsaquo; App &rsaquo; Safari &rsaquo; Estensioni &rsaquo; <strong>Userscripts</strong>: attivala se non lo è già.</p>
+            <p style="margin-top:0.6rem;">Poi <strong>Permessi</strong> &rsaquo; <strong>Altri siti web</strong> &rsaquo; <strong>Consenti</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Aggiungi FUTMAGO</h3>
+            <p>Apri questo indirizzo in Safari:</p>
+            <p style="margin-top:0.9rem;"><a class="btn-primary" href="/futmago.user.js">Apri lo script</a></p>
+            <p style="margin-top:0.9rem;">Vedrai del testo. Restando su quella pagina, in basso, clicca sul tasto a sinistra dell'indirizzo web e apri il pannello di Userscripts.</p>
+            <figure class="fm-schermata-larga">
+              <img src="/guida-ios/guida-ios-0-tasto.png" alt="La barra dell'indirizzo di Safari, con il tasto delle estensioni cerchiato in verde a sinistra dell'indirizzo" loading="lazy" width="560" height="104">
+              <figcaption>È questo, a sinistra dell'indirizzo.</figcaption>
+            </figure>
+            <div class="fm-schermate">
+              <figure>
+                <img src="/guida-ios/guida-ios-1-rilevato.png" alt="Il pannello di Userscripts con la striscia gialla «Userscript Detected: Tap to install»" loading="lazy" width="560" height="275">
+                <figcaption>Premi la striscia gialla.</figcaption>
+              </figure>
+              <figure>
+                <img src="/guida-ios/guida-ios-2-installa.png" alt="La schermata di conferma di Userscripts, con il nome FUTMAGO e il tasto Install" loading="lazy" width="560" height="625">
+                <figcaption>Poi <strong>Install</strong>.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">4</div></div>
+          <div class="step-body">
+            <h3>Fatto</h3>
+            <p>Apri o riavvia la Web App di EA. Da ora FUTMAGO è sempre attivo: non dovrai più rifare questi passaggi.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:3rem; font-size:1.15rem;">Oppure: il segnalibro, senza installare nulla</h3>
+      <p class="section-desc" style="margin-top:0.6rem;">Non richiede nessuna app, ma va premuto ogni volta che apri la Web App. Se hai già fatto i passaggi qui sopra, salta pure.</p>
+
+      <div class="steps" style="margin-top:2rem;">
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">A</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Copia il codice</h3>
+            <p>Premi COPIA: è l'indirizzo del segnalibro.</p>
+            <code class="fm-codice" id="fm-bookmarklet">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.5.0-5233abe3').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
+            <button class="fm-copia" data-copia="fm-bookmarklet">Copia</button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">B</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Crea un segnalibro qualsiasi</h3>
+            <p>In Safari, su una pagina qualunque, premi il tasto Condividi e poi «Aggiungi ai preferiti». Salvalo e chiudi.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">C</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Incolla il codice dentro il segnalibro</h3>
+            <p>Apri i preferiti, tieni premuto sul segnalibro appena creato e scegli «Modifica». Chiamalo <strong>FUTMAGO</strong>, cancella l'indirizzo che c'è e incolla quello copiato al passo A. Salva.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">D</div></div>
+          <div class="step-body">
+            <h3>Usalo</h3>
+            <p>Apri la Web App di EA in Safari, entra col tuo account, poi apri i preferiti e premi <strong>FUTMAGO</strong>. Il pannello compare sopra la pagina. Va ripremuto ogni volta che ricarichi la Web App.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANDROID ── -->
+    <div class="fm-guida" id="guida-android">
+      <h2 class="section-title" style="font-size:1.8rem; margin-top:1rem;">Android</h2>
+      <p class="section-desc">Su Android ci sono due strade. La prima fa partire FUTMAGO da solo e si prepara <strong>una volta sola</strong>; la seconda non richiede nulla ma va ripetuta ogni volta.</p>
+
+      <h3 style="margin-top:2.5rem; font-size:1.15rem;">Con Firefox — consigliata</h3>
+
+      <div class="steps" style="margin-top:1.5rem;">
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Installa Firefox</h3>
+            <p>Dal Play Store, quello normale — non Firefox Focus.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Aggiungi Violentmonkey</h3>
+            <p>In Firefox apri <code style="color:var(--green)">addons.mozilla.org/android/addon/violentmonkey</code> e tocca <strong>Aggiungi a Firefox</strong>. È gratuita e non è nostra: serve a far girare FUTMAGO dentro la pagina di EA.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Aggiungi FUTMAGO</h3>
+            <p>Sempre in Firefox, apri questo indirizzo:</p>
+            <p style="margin-top:0.9rem;"><a class="btn-primary" href="/futmago.user.js">Apri lo script</a></p>
+            <p style="margin-top:0.9rem;">Violentmonkey riconosce il file e mostra la schermata di installazione: tocca <strong>Installa</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">4</div></div>
+          <div class="step-body">
+            <h3>Fatto</h3>
+            <p>Apri o riavvia la Web App di EA in Firefox. Da ora FUTMAGO è sempre attivo: non dovrai più rifare questi passaggi.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:3rem; font-size:1.15rem;">Con Chrome — il segnalibro</h3>
+      <p class="section-desc" style="margin-top:0.6rem;">Chrome su Android non accetta estensioni: nessuna, non solo la nostra. Resta il segnalibro, che va premuto ogni volta che apri la Web App.</p>
+
+      <div class="steps" style="margin-top:1.5rem;">
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">A</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Copia il codice</h3>
+            <code class="fm-codice" id="fm-bookmarklet-android">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.5.0-5233abe3').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
+            <button class="fm-copia" data-copia="fm-bookmarklet-android">Copia</button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">B</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <h3>Crea un segnalibro e modificalo</h3>
+            <p>In Chrome, su una pagina qualunque, tocca la stella per salvarla nei preferiti. Poi Preferiti, tieni premuto sul segnalibro appena creato, <strong>Modifica</strong>: chiamalo <strong>FUTMAGO</strong>, cancella l'indirizzo e incolla il codice.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-wrap"><div class="step-num">C</div></div>
+          <div class="step-body">
+            <h3>Usalo</h3>
+            <p>Apri la Web App di EA, poi scrivi <strong>FUTMAGO</strong> nella barra dell'indirizzo e tocca il suggerimento che compare.</p>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BETA ═══ -->
+<section>
+  <div class="container">
+    <span class="section-label">La beta</span>
+    <h2 class="section-title">Gratis, e <span class="g">senza limiti</span></h2>
+    <p class="section-desc">Durante la beta FUTMAGO è gratuito e non ha tetti di utilizzo. In cambio ci aspettiamo che tu ci dica cosa non funziona.</p>
+
+    <table class="fm-tabella">
+      <tr><td>Quanto costa</td><td>Niente. Nessun pagamento, nessun abbonamento, nessuna carta di credito.</td></tr>
+      <tr><td>Serve un account?</td><td>No. FUTMAGO non ha login e non ti chiede nessun dato.</td></tr>
+      <tr><td>Quante SBC posso fare</td><td>Durante la beta, quante vuoi. Più avanti ci sarà un piano gratuito con un tetto giornaliero e uno a pagamento senza tetto: lo diremo prima, non da un giorno all'altro.</td></tr>
+      <tr><td>Le mie carte dove vanno</td><td>Da nessuna parte. Il club viene letto e usato sul tuo dispositivo, e non viene inviato a noi.</td></tr>
+      <tr><td>Cosa riceviamo noi</td><td>Un numero casuale che nasce sul tuo dispositivo, la versione di FUTMAGO che stai usando e quante SBC hai completato. Non il nome delle SBC, non le carte, niente del tuo account EA.</td></tr>
+      <tr><td>È sicuro per il mio account?</td><td>FUTMAGO fa le stesse cose che faresti tu a mano nella Web App, e non invia mai una SBC senza la tua conferma. Detto questo: è uno strumento non ufficiale, EA non lo approva, e chi lo usa lo fa a proprio rischio. Preferiamo dirtelo che nasconderlo.</td></tr>
+      <tr><td>Browser supportati</td><td>Chrome, Edge, Brave, Opera e Firefox su computer. Safari su iPhone e iPad col segnalibro. Firefox su Android, o Chrome Android col segnalibro.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section>
+  <div class="container">
+    <span class="section-label">Domande</span>
+    <h2 class="section-title">Quello che <span class="g">ci chiedono</span></h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Ho premuto il pulsante e non succede niente<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">Ricarica la Web App e riprova. Se usi il segnalibro, va ripremuto ogni volta che la pagina si ricarica. Se il pannello proprio non compare, controlla di essere sulla Web App di EA e non sull'app del telefono: FUTMAGO funziona solo dentro la Web App nel browser.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">FUTMAGO dice che una carta è in prestito<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">EA non accetta una rosa che contiene giocatori in prestito: la rifiuta senza dire perché. FUTMAGO se ne accorge prima e te lo dice. Scarta quelle carte o rendile tue, poi rigenera la soluzione.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Perché non riesco ad aprire più di un pacchetto?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">EA non apre un pacchetto se hai oggetti non assegnati in sospeso. Nelle impostazioni dell'apertura scegli dove mandare le carte — al club o in archivio — e la sequenza andrà avanti da sola.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Posso usarlo su più dispositivi?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">Sì. Installalo dove ti serve: non c'è un account, quindi non c'è niente da collegare.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Come vi segnalo un problema?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">Scrivi su Telegram a <a href="https://t.me/ILMAGODIFUT">@ILMAGODIFUT</a>. Dicci cosa stavi facendo, su quale dispositivo, e cosa è comparso a schermo: con quelle tre cose si risolve quasi sempre.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Il <span class="g">Mago</span> di FUT</div>
+    <ul class="footer-links">
+      <li><a href='/#promo'>Piani</a></li>
+      <li><a href='/servizi'>Servizi</a></li>
+      <li><a href='/chi-siamo'>Chi siamo</a></li>
+      <li><a href='/come-funziona'>Come funziona</a></li>
+      <li><a href='/faq'>FAQ</a></li>
+      <li><a href='/futmago'>FUTMAGO</a></li>
+      <li><a href='/cookie-policy'>Cookie Policy</a></li>
+      <li><a href="https://t.me/ILMAGODIFUT">Telegram</a></li>
+    </ul>
+    <div class="footer-copy">© 2026 Il Mago di FUT · Sito non affiliato con EA Sports. FUTMAGO è uno strumento non ufficiale e non è approvato da EA.</div>
+  </div>
+</footer>
+
+<script src="/assets/script.js"></script>
+<script>
+/* Le schede delle piattaforme e i pulsanti «copia». Nient'altro: il resto
+   della pagina lo fa gia' lo script del sito. */
+(function () {
+  var schede = document.querySelectorAll('.fm-tab-btn');
+  schede.forEach(function (scheda) {
+    scheda.addEventListener('click', function () {
+      var quale = scheda.getAttribute('data-guida');
+      document.querySelectorAll('.fm-guida').forEach(function (g) {
+        g.classList.toggle('aperta', g.id === 'guida-' + quale);
+      });
+      document.getElementById('guida-' + quale).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.querySelectorAll('.fm-copia').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var testo = document.getElementById(b.getAttribute('data-copia')).textContent;
+      navigator.clipboard.writeText(testo).then(function () {
+        var prima = b.textContent;
+        b.textContent = 'Copiato';
+        setTimeout(function () { b.textContent = prima; }, 1600);
+      });
+    });
+  });
+
+  /* Su un telefono la scheda «Computer» non serve: si apre quella giusta. */
+  var mobile = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'iphone'
+             : /Android/i.test(navigator.userAgent) ? 'android' : null;
+  if (mobile) {
+    document.querySelectorAll('.fm-guida').forEach(function (g) {
+      g.classList.toggle('aperta', g.id === 'guida-' + mobile);
+    });
+  }
+})();
+</script>
+</body>
+</html>
