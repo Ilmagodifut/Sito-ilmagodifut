@@ -736,3 +736,15 @@ footer {
   font-family: 'Rajdhani', sans-serif; font-weight: 700; text-decoration: none; border: none; cursor: pointer;
   padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.85rem; letter-spacing: 0.04em;
 }
+
+/* ── BARRA: il panino arriva prima, da quando c'e' anche FUTMAGO ──────────
+   Con sei voci piu' il pulsante, fra 901 e ~1180px la barra si stringeva
+   fino a toccarsi: misurato a 1000px, zero pixel fra il logo e la prima
+   voce, e zero fra l'ultima e «Diventa Elite».
+   Si aggiungono SOLO le tre regole della barra, senza spostare il blocco
+   dei 900px che ne contiene altre undici che qui non c'entrano. */
+@media (max-width: 1180px) {
+  .nav-links, .nav-cta { display: none; }
+  .nav-mobile-btn { display: block; }
+  .nav-mobile-panel { display: flex; }
+}

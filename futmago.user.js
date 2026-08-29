@@ -8,45 +8,29 @@
 // @inject-into  page
 // ==/UserScript==
 
-/*
- * IL VEICOLO iOS CHE NON COSTA NULLA.
- *
- * Su iPhone un'estensione Safari deve stare dentro un'app e l'app deve venire
- * dall'App Store: non esiste alcun modo di installarla da una pagina web.
- * Pubblicare la *nostra* app costa 99 $/anno e richiede un Mac.
- *
- * Questo file salta il problema passando da un'estensione che qualcun altro ha
- * gia' pubblicato — **Userscripts**, gratuita — e che esiste apposta per far
- * girare codice come questo. Per noi il costo e' zero, e per l'utente
- * l'attivazione avviene dal browser, senza installare niente di nostro.
- *
- * E' lo stesso file che serviamo al bookmarklet di Chrome Android: identico
- * meccanismo, involucro diverso.
- *
- * ## Le due righe dell'intestazione che decidono tutto
- *
- *   @inject-into page   Senza, Userscripts inietta nel mondo ISOLATO e
- *                       `window.repositories` non si vede: FUTMAGO partirebbe
- *                       e non troverebbe nulla.
- *
- *   nessun @grant       Se lo script dichiara un qualsiasi `@grant`,
- *                       Userscripts riporta `@inject-into` a `content` **in
- *                       silenzio**, annullando la riga sopra. Percio' qui non
- *                       si usa nessuna API GM_*.
- *
- * ## Perche' scarica invece di contenere il bundle
- *
- * Perche' cosi' un aggiornamento non chiede all'utente di reincollare mezzo
- * megabyte dal telefono. Il `?v=` evita che una cache vecchia blocchi il
- * rilascio nuovo.
- *
- * `.then(eval)` e non `eval(t)`: passato come funzione, `eval` viene invocato
- * in modo indiretto e valuta nell'ambito globale. Dentro la callback
- * valuterebbe nell'ambito della callback, e FUTMAGO sparirebbe appena la
- * promise si risolve.
- */
+/*  ──────────────────────────────────────────────────────────────
+    FUTMAGO — COME INSTALLARLO
 
-fetch('https://ilmagodifut.com/futmago.js?v=0.5.0-5233abe3')
+    Vedi del testo invece di una pagina? E' normale, non e' un errore:
+    questo file va dato al programma che lo fa girare, non letto.
+
+    SU iPHONE (Userscripts)
+      1. tocca il tasto a sinistra dell'indirizzo, qui sopra
+      2. apri  Userscripts
+      3. compare una striscia gialla: premila
+      4. poi  Install
+
+    SU ANDROID (Firefox + Violentmonkey)
+      la schermata di installazione compare da sola: premi  Installa
+
+    Poi apri la Web App di EA. FUTMAGO parte da solo, e non dovrai
+    piu' rifare niente: gli aggiornamenti arrivano da soli.
+
+    Non hai ancora l'app che serve? La guida completa e' qui:
+    ilmagodifut.com/futmago
+    ────────────────────────────────────────────────────────────── */
+
+fetch('https://ilmagodifut.com/futmago.js?v=0.5.0-0d76fbd3')
   .then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.text();
