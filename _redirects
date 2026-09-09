@@ -1,0 +1,10 @@
+# REDIREZIONI DEL SITO
+#
+# /home e' l'indirizzo della home del vecchio sito Wix. Google lo tiene ancora
+# in elenco e chi ci clicca trova una pagina d'errore -- segnalato il
+# 10/09/2026 con il link vero preso dai risultati di ricerca.
+#
+# 301 e non 302: dice a Google che quell'indirizzo e' cambiato PER SEMPRE.
+# Cosi' chi ci arriva oggi vede la home, e col tempo il risultato sbagliato
+# sparisce dalle ricerche da solo. Con un 302 resterebbe li'.
+/home    /    301

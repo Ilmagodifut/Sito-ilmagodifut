@@ -1,16 +1,24 @@
 // Menu mobile
+//
+// Le pagine di ringraziamento non hanno il menu: hanno un'intestazione
+// ridotta, senza il pulsante e senza la tendina. Senza questo controllo la
+// riga qui sotto sollevava un errore e il file si fermava li' -- portandosi
+// dietro TUTTO quello che viene dopo, compreso il banner dei cookie e il
+// caricamento di Google Analytics. Su quelle cinque pagine non partiva nulla.
 const mobileBtn = document.querySelector('.nav-mobile-btn');
 const mobileMenu = document.getElementById('mobileMenu');
-mobileBtn.addEventListener('click', () => {
-  const isOpen = mobileMenu.classList.toggle('open');
-  mobileBtn.setAttribute('aria-expanded', isOpen);
-  mobileBtn.textContent = isOpen ? '✕' : '☰';
-});
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-  mobileMenu.classList.remove('open');
-  mobileBtn.setAttribute('aria-expanded', 'false');
-  mobileBtn.textContent = '☰';
-}));
+if (mobileBtn && mobileMenu) {
+  mobileBtn.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    mobileBtn.setAttribute('aria-expanded', isOpen);
+    mobileBtn.textContent = isOpen ? '✕' : '☰';
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    mobileBtn.setAttribute('aria-expanded', 'false');
+    mobileBtn.textContent = '☰';
+  }));
+}
 
 // FAQ accordion
 document.querySelectorAll('.faq-item').forEach(item => {
