@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="it"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FUTMAGO - installa in Userscripts</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/futmago-icona-32.png">
+<style>
+  body { margin:0; padding:20px; background:#0b0f14; color:#e8eef5;
+         font:16px/1.5 -apple-system, system-ui, sans-serif; }
+  h1 { font-size:20px; color:#39ff14; margin:0 0 4px; }
+  p { color:#9fb0c0; font-size:14px; margin:6px 0 16px; }
+  ol { padding-left:20px; font-size:14px; color:#cfd9e3; }
+  li { margin:8px 0; }
+  button { width:100%; min-height:52px; font-size:17px; font-weight:700;
+           background:#39ff14; color:#000; border:0; border-radius:10px;
+           margin:18px 0; }
+  textarea { width:100%; height:180px; background:#0d1117; color:#8fa3b8;
+             border:1px solid #2b3a4d; border-radius:8px; padding:10px;
+             font:12px/1.4 ui-monospace, monospace; }
+  a { color:#39ff14; font-size:14px; }
+</style></head><body>
+<h1>FUTMAGO per Userscripts</h1>
+<p>Copia il codice, poi incollalo dentro l'app Userscripts.</p>
+<button id="b">COPIA IL CODICE</button>
+<ol>
+  <li>Premi COPIA qui sopra</li>
+  <li>Apri l'app <b>Userscripts</b></li>
+  <li>Premi <b>+</b> e crea un nuovo script</li>
+  <li>Cancella cio' che c'e' e incolla</li>
+  <li>Salva, poi apri la Web App di EA</li>
+</ol>
+<textarea id="t" readonly>// ==UserScript==
+// @name         FUTMAGO
+// @namespace    https://ilmagodifut.com
+// @version      0.5.1
+// @description  Risolve le SBC di EA FC direttamente nella Web App. Nessun account, nessun dato inviato: il club resta sul tuo dispositivo.
+// @match        https://www.ea.com/*ultimate-team/web-app*
+// @run-at       document-idle
+// @inject-into  page
+// ==/UserScript==
+
+/*  ──────────────────────────────────────────────────────────────
+    FUTMAGO — COME INSTALLARLO
+
+    Vedi del testo invece di una pagina? E' normale, non e' un errore:
+    questo file va dato al programma che lo fa girare, non letto.
+
+    SU iPHONE (Userscripts)
+      1. tocca il tasto a sinistra dell'indirizzo, qui sopra
+      2. apri  Userscripts
+      3. compare una striscia gialla: premila
+      4. poi  Install
+
+    SU ANDROID (Firefox + Violentmonkey)
+      la schermata di installazione compare da sola: premi  Installa
+
+    Poi apri la Web App di EA. FUTMAGO parte da solo, e non dovrai
+    piu' rifare niente: gli aggiornamenti arrivano da soli.
+
+    Non hai ancora l'app che serve? La guida completa e' qui:
+    ilmagodifut.com/futmago
+    ────────────────────────────────────────────────────────────── */
+
+fetch('https://ilmagodifut.com/futmago.js?v=0.5.1-cc0d8101')
+  .then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(eval)
+  .catch(function (e) {
+    console.error('[FUTMAGO] caricamento non riuscito:', e);
+  });
+</textarea>
+<p><a href="/futmago">Torna alla pagina di FUTMAGO</a></p>
+<script>
+  var t = document.getElementById('t'), b = document.getElementById('b');
+  b.addEventListener('click', function () {
+    t.select(); t.setSelectionRange(0, 999999);
+    var fatto = false;
+    try { fatto = document.execCommand('copy'); } catch (e) {}
+    if (navigator.clipboard) { navigator.clipboard.writeText(t.value).then(function () {}, function () {}); fatto = true; }
+    b.textContent = fatto ? 'COPIATO' : 'SELEZIONA E COPIA A MANO';
+    setTimeout(function () { b.textContent = 'COPIA IL CODICE'; }, 2200);
+  });
+</script>
+</body></html>
