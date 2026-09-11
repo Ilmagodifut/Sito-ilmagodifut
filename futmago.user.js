@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FUTMAGO
 // @namespace    https://ilmagodifut.com
-// @version      0.5.3
+// @version      0.5.4
 // @description  Risolve le SBC di EA FC direttamente nella Web App. Nessun account, nessun dato inviato: il club resta sul tuo dispositivo.
 // @match        https://www.ea.com/*ultimate-team/web-app*
 // @run-at       document-idle
@@ -30,7 +30,7 @@
     ilmagodifut.com/futmago
     ────────────────────────────────────────────────────────────── */
 
-fetch('https://ilmagodifut.com/futmago.js?v=0.5.3-8451eddd')
+fetch('https://ilmagodifut.com/futmago.js?v=0.5.4-3310de0f')
   .then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.text();
