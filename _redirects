@@ -8,3 +8,38 @@
 # Cosi' chi ci arriva oggi vede la home, e col tempo il risultato sbagliato
 # sparisce dalle ricerche da solo. Con un 302 resterebbe li'.
 /home    /    301
+
+# ── GLI ALTRI INDIRIZZI DEL VECCHIO SITO WIX ───────────────────────────────
+#
+# Trovati il 14/09/2026 nell'archivio pubblico del web: 28 indirizzi del
+# vecchio sito, e 26 rispondevano 404. Google li teneva ancora in elenco — il
+# sottolink "Diventa un elite!" portava a una pagina d'errore.
+#
+# Due regole diverse, a seconda che la pagina abbia o no un'erede.
+
+# 301 — la pagina c'e' ancora, sotto un altro nome. Google passa il risultato
+# alla pagina nuova, e chi clicca arriva nel posto giusto.
+/diventa-un-elite     /                           301
+/home-old             /                           301
+/fifa-ultimate        /                           301
+/gestioni-account     /gestione-account.html      301
+/servizi-wl           /servizio-wl-rivals.html    301
+/servizio-rivals      /servizio-wl-rivals.html    301
+/servizio-gauntlet    /servizi.html               301
+/livello-1            /servizi.html               301
+/livello-2            /servizi.html               301
+/livello-3            /servizi.html               301
+/livello-4            /servizi.html               301
+/livello-5            /servizi.html               301
+
+# 410 — la pagina non esiste piu' e non ha un'erede: nel sito nuovo il blog non
+# c'e'. 410 vuol dire "tolto apposta", e Google lo cancella prima di un 404.
+# Chi ci clicca vede comunque la home invece di un errore: lo stato lo legge
+# Google, la pagina la legge la persona.
+#
+# Rimandarli alla home con un 301 non servirebbe: Google tratta cento pagine
+# diverse che finiscono tutte sulla home come pagine sparite, e lo dice.
+/blog                 /index.html                 410
+/blog/*               /index.html                 410
+/post/*               /index.html                 410
+/test                 /index.html                 410
