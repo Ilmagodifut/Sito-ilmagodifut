@@ -59,17 +59,52 @@
     'font:inherit;font-weight:800;font-size:16px;letter-spacing:.04em;cursor:pointer;' +
     '-webkit-appearance:none;appearance:none}';
 
-  var CORPO =
-    '<div class="velo" role="dialog" aria-labelledby="futmago-pausa-titolo">' +
-    '<div class="scheda">' +
-    '<p class="marchio">FUTMAGO</p>' +
-    '<p class="titolo" id="futmago-pausa-titolo">FUTMAGO è in pausa</p>' +
-    '<p class="testo">Stiamo adattando FUTMAGO alla nuova Web App di FC 27. ' +
-    'Tornarà disponibile a breve: segui ' +
-    '<a href="https://www.instagram.com/ilmagodifut/" target="_blank" rel="noopener">@ilmagodifut</a>' +
-    ' per sapere quando.</p>' +
-    '<button type="button" class="ok">Ho capito</button>' +
-    '</div></div>';
+  /*
+   * Gli elementi si creano uno per uno, senza innerHTML. Il testo e' fisso e
+   * nostro, quindi non c'era un rischio vero; ma il controllo ufficiale di
+   * Mozilla lo segnala comunque, e un avviso in meno nel pacchetto e' una
+   * domanda in meno quando l'estensione andra' sugli store.
+   */
+  function elemento(tag, classe, testo) {
+    var e = document.createElement(tag);
+    if (classe) e.className = classe;
+    if (testo) e.textContent = testo;
+    return e;
+  }
+
+  function costruisciScheda() {
+    var velo = elemento('div', 'velo');
+    velo.setAttribute('role', 'dialog');
+    velo.setAttribute('aria-labelledby', 'futmago-pausa-titolo');
+
+    var scheda = elemento('div', 'scheda');
+    scheda.appendChild(elemento('p', 'marchio', 'FUTMAGO'));
+
+    var titolo = elemento('p', 'titolo', 'FUTMAGO è in pausa');
+    titolo.id = 'futmago-pausa-titolo';
+    scheda.appendChild(titolo);
+
+    var testo = elemento('p', 'testo');
+    testo.appendChild(
+      document.createTextNode(
+        'Stiamo adattando FUTMAGO alla nuova Web App di FC 27. Tornarà disponibile a breve: segui ',
+      ),
+    );
+    var profilo = elemento('a', '', '@ilmagodifut');
+    profilo.href = 'https://www.instagram.com/ilmagodifut/';
+    profilo.target = '_blank';
+    profilo.rel = 'noopener';
+    testo.appendChild(profilo);
+    testo.appendChild(document.createTextNode(' per sapere quando.'));
+    scheda.appendChild(testo);
+
+    var ok = elemento('button', 'ok', 'Ho capito');
+    ok.type = 'button';
+    scheda.appendChild(ok);
+
+    velo.appendChild(scheda);
+    return velo;
+  }
 
   function mostra() {
     if (document.getElementById('futmago-pausa')) return;
@@ -84,10 +119,12 @@
     for (var k in fisso) ospite.style.setProperty(k, fisso[k], 'important');
 
     var radice = ospite.attachShadow ? ospite.attachShadow({ mode: 'open' }) : ospite;
-    radice.innerHTML = '<style>' + STILE + '</style>' + CORPO;
-
-    var velo = radice.querySelector('.velo');
-    var ok = radice.querySelector('.ok');
+    var foglio = document.createElement('style');
+    foglio.textContent = STILE;
+    radice.appendChild(foglio);
+    var velo = costruisciScheda();
+    radice.appendChild(velo);
+    var ok = velo.querySelector('.ok');
 
     /*
      * ── SEMPRE SOPRA A CIO' CHE SI VEDE ──────────────────────────────────
