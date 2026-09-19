@@ -34,6 +34,28 @@
 <link rel="stylesheet" href="/assets/style.css">
 
 <style>
+  /* ── L'ANNUNCIO DI PAUSA PER FC 27 ──────────────────────────────────────
+     FUTMAGO e' in pausa dal 15/09/2026 mentre lo adattiamo alla Web App di
+     FC 27. Quando riparte, questo blocco e la classe si tolgono insieme. */
+  .fm-annuncio {
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    padding: 1.1rem 1.35rem;
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    background: var(--green-glow2);
+    box-shadow: 0 0 28px var(--green-glow);
+    text-align: left;
+  }
+  .fm-annuncio-titolo {
+    display: flex; align-items: center; gap: .55rem;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 1.25rem; letter-spacing: .02em; color: var(--green);
+    margin: 0 0 .35rem;
+  }
+  .fm-annuncio p { margin: 0; color: var(--text); line-height: 1.55; }
+  .fm-annuncio a { color: var(--green); font-weight: 600; }
+
   /* Solo cio' che il foglio del sito non ha gia'. Niente colori nuovi: le
      variabili sono quelle di style.css. */
   /*
@@ -155,9 +177,14 @@
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
+  <div class="fm-annuncio" role="status">
+    <p class="fm-annuncio-titolo"><span class="eyebrow-dot"></span>FUTMAGO si sta aggiornando per FC 27</p>
+    <p>È uscita la nuova Web App di EA Sports FC 27 e stiamo adattando FUTMAGO. Nel frattempo è in pausa: tornerà disponibile a breve. Segui <a href="https://www.instagram.com/ilmagodifut/" target="_blank" rel="noopener">@ilmagodifut</a> per sapere quando.</p>
+  </div>
+
   <div class="hero-eyebrow">
     <span class="eyebrow-dot"></span>
-    BETA aperta · EA Sports FC26 · gratis
+    In aggiornamento per EA Sports FC 27
   </div>
 
   <div class="hero-brand">Il Mago di FUT presenta</div>
