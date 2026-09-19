@@ -87,7 +87,7 @@
     var testo = elemento('p', 'testo');
     testo.appendChild(
       document.createTextNode(
-        'Stiamo adattando FUTMAGO alla nuova Web App di FC 27. Tornarà disponibile a breve: segui ',
+        'Stiamo adattando FUTMAGO alla nuova Web App di FC 27. Tornerà disponibile a breve: segui ',
       ),
     );
     var profilo = elemento('a', '', '@ilmagodifut');
