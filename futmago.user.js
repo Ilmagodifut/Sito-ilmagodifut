@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FUTMAGO
 // @namespace    https://ilmagodifut.com
-// @version      0.6.1
+// @version      0.6.2
 // @description  SBC automatizzate, Album e sniping del mercato nella Web App di EA Sports FC 27.
 // @match        https://www.ea.com/*ultimate-team/web-app*
 // @run-at       document-idle
@@ -30,7 +30,7 @@
     ilmagodifut.com/futmago
     ────────────────────────────────────────────────────────────── */
 
-fetch('https://ilmagodifut.com/futmago.js?v=0.6.1-40a4738a')
+fetch('https://ilmagodifut.com/futmago.js?v=0.6.2-c4338b73')
   .then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.text();
