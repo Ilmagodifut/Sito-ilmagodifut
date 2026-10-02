@@ -380,5 +380,100 @@
     accendi('[data-paga-mese]', conAccount(PAGA_MESE)) & accendi('[data-paga-stagione]', conAccount(PAGA_STAGIONE));
   if (!pronti) document.querySelector('[data-daFare]').hidden = false;
 </script>
+<!-- ── PRIMA L'EMAIL, POI STRIPE ─────────────────────────────────────
+     CHIESTO il 02/10/2026: dal sito, prima del pagamento, una pagina
+     semplicissima chiede l'email per FUTMAGO Premium. Con Apple Pay o
+     PayPal Stripe userebbe l'email del portafoglio, che spesso non si
+     ricorda nessuno. Da dentro FUTMAGO questo passo si salta: l'account
+     arriva gia' attaccato (#rif). -->
+<div class="fm-email" data-email-passo hidden>
+  <div class="fm-email-scheda" role="dialog" aria-modal="true" aria-labelledby="fm-email-titolo">
+    <button class="fm-email-chiudi" type="button" data-email-chiudi aria-label="Chiudi">×</button>
+    <h2 id="fm-email-titolo">La tua email per FUTMAGO Premium</h2>
+    <p>Con questa email entrerai in FUTMAGO: il Premium sarà collegato a lei, qualunque metodo di pagamento usi.</p>
+    <form data-email-modulo novalidate>
+      <input type="email" data-email-campo placeholder="la-tua@email.it" autocomplete="email" required>
+      <p class="fm-email-errore" data-email-errore hidden></p>
+      <button class="pricing-cta" type="submit" data-email-vai>Continua al pagamento</button>
+    </form>
+  </div>
+</div>
+<style>
+  .fm-email { position: fixed; inset: 0; z-index: 1000; background: rgba(4,6,9,.78); display: grid; place-items: center; padding: 16px; }
+  .fm-email[hidden] { display: none; }
+  .fm-email-scheda { position: relative; width: 100%; max-width: 440px; background: #0d1117; border: 1px solid var(--green); border-radius: 14px; padding: 28px 24px 24px; box-shadow: 0 0 40px var(--green-glow); }
+  .fm-email-scheda h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; margin: 0 0 .5rem; color: #fff; }
+  .fm-email-scheda p { color: var(--text-muted, #9fb0c0); margin: 0 0 1.1rem; line-height: 1.5; }
+  .fm-email-scheda input { width: 100%; box-sizing: border-box; padding: 14px 14px; border-radius: 8px; border: 1px solid #2f3b49; background: #12161d; color: #fff; font-size: 1rem; margin-bottom: .8rem; }
+  .fm-email-scheda input:focus { outline: none; border-color: var(--green); }
+  .fm-email-scheda .pricing-cta { display: block; width: 100%; border: none; cursor: pointer; background: var(--green); color: #000; padding: 14px 18px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 0 22px var(--green-glow); }
+  .fm-email-scheda .pricing-cta:disabled { opacity: .6; cursor: default; }
+  .fm-email-errore { color: #ff8a8a !important; font-size: .9rem; margin: -.3rem 0 .8rem !important; }
+  .fm-email-chiudi { position: absolute; top: 10px; right: 12px; background: none; border: none; color: #9fb0c0; font-size: 1.6rem; cursor: pointer; }
+</style>
+<script>
+(function () {
+  var API = 'https://futmago-licenza.futmago-api.workers.dev';
+  var passo = document.querySelector('[data-email-passo]');
+  var modulo = document.querySelector('[data-email-modulo]');
+  var campo = document.querySelector('[data-email-campo]');
+  var errore = document.querySelector('[data-email-errore]');
+  var vai = document.querySelector('[data-email-vai]');
+  var destinazione = '';
+
+  /* Da FUTMAGO l'account e' gia' attaccato: niente passo in piu'. */
+  var daFutmago = /(^|[#&])rif=/.test(location.hash);
+
+  function apri(indirizzo) {
+    destinazione = indirizzo;
+    errore.hidden = true;
+    passo.hidden = false;
+    setTimeout(function () { campo.focus(); }, 50);
+  }
+  function chiudi() { passo.hidden = true; }
+
+  ['[data-paga-mese]', '[data-paga-stagione]'].forEach(function (sel) {
+    var tasto = document.querySelector(sel);
+    if (!tasto) return;
+    tasto.addEventListener('click', function (e) {
+      var href = tasto.getAttribute('href') || '';
+      if (daFutmago || href.indexOf('https://') !== 0) return;
+      e.preventDefault();
+      apri(href);
+    });
+  });
+  document.querySelector('[data-email-chiudi]').addEventListener('click', chiudi);
+  passo.addEventListener('click', function (e) { if (e.target === passo) chiudi(); });
+
+  modulo.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = campo.value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      errore.textContent = 'Scrivi un indirizzo email valido.';
+      errore.hidden = false;
+      return;
+    }
+    vai.disabled = true;
+    vai.textContent = 'Un attimo…';
+    fetch(API + '/v1/riferimento', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        var extra = 'prefilled_email=' + encodeURIComponent(email);
+        if (r && r.ok && /^[A-Za-z0-9_-]{1,200}$/.test(r.riferimento || '')) {
+          extra = 'client_reference_id=' + r.riferimento + '&' + extra;
+        }
+        location.href = destinazione + (destinazione.indexOf('?') >= 0 ? '&' : '?') + extra;
+      })
+      .catch(function () {
+        /* Server giu': si paga lo stesso, con l'email gia' scritta nel campo. */
+        location.href = destinazione + (destinazione.indexOf('?') >= 0 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(email);
+      });
+  });
+})();
+</script>
 </body>
 </html>
