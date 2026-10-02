@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FUTMAGO Premium | Il Mago di FUT</title>
+<meta name="description" content="FUTMAGO Premium: risolutore SBC, SNIPE, AUTOMAGO e Album senza limiti giornalieri. 5,99 al mese o 39,99 per tutta la stagione FC 27.">
+<link rel="canonical" href="https://ilmagodifut.com/premium">
+<link rel="icon" type="image/png" sizes="32x32" href="/futmago-icona-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  LA PAGINA DEI PIANI, DENTRO IL SITO.
+
+  ── PERCHE' NON HA UN SUO ASPETTO ─────────────────────────────────────────
+
+  CHIESTO dall'utente il 25/09/2026: «la pagina di FUTMAGO e' questa, quindi
+  la pagina del premium la devi fare con stesso layout colori font ecc».
+
+  Quindi non si imitano: si USANO. Questa pagina carica `/assets/style.css`
+  del sito e riusa le sue classi — `container`, `section-label`,
+  `section-title`, `pricing-grid`, `pricing-card`, `pricing-features`,
+  `pricing-cta`, piu' la stessa barra e lo stesso piede. Gli unici stili
+  scritti qui sono quelli che il sito non ha ancora: la tabella a due colonne
+  con le stesse righe, e l'interruttore fra mensile e stagione.
+
+  Il vantaggio non e' la somiglianza: e' che il giorno in cui il sito cambia
+  verde o carattere, questa pagina cambia con lui senza che nessuno se ne
+  ricordi.
+
+  ── DUE COLONNE CON LE STESSE RIGHE ───────────────────────────────────────
+
+  Ogni riga nomina la stessa funzione nelle due colonne e cambia solo il
+  valore a destra: e' l'unico modo di farle confrontare a colpo d'occhio.
+  L'elenco e' TUTTO quello che FUTMAGO fa, non solo cio' che ha un tetto —
+  «dobbiamo vendere, devi mettere tutte le funzionalita' che abbiamo creato».
+
+  E la riga che il gratuito non ha porta una crocetta rossa, in chiaro.
+  Toglierla per non farla notare vorrebbe dire far scoprire il limite a chi ha
+  gia' installato.
+
+  ── DUE MODI DI PAGARE, E NON SONO LA STESSA COSA ─────────────────────────
+
+  Il mensile e' un abbonamento: si rinnova da solo finche' non lo disdici. La
+  stagione e' un pagamento UNICO che vale fino a una data fissa, il 15
+  settembre 2027 — non dodici mesi da quando compri.
+
+  La differenza non e' commerciale, e' tecnica: su Stripe sono due prodotti
+  diversi (`subscription` e `payment`), e il nostro webhook li distingue
+  guardando `mode`. Se fossero creati tutti e due come abbonamento, chi prende
+  la stagione si vedrebbe accendere il premium per trentun giorni.
+
+  ── NON C'E' NIENTE CHE CHIAMI CASA ───────────────────────────────────────
+
+  Nessun tracciamento e nessun carrello. Il pagamento lo fa Stripe sulla sua
+  pagina: i dati della carta non passano da qui e non passano dal nostro
+  server, ed e' il motivo per cui in tutto il progetto non c'e' una riga che
+  sappia cos'e' un numero di carta.
+
+  ── SE UN COLLEGAMENTO MANCA ──────────────────────────────────────────────
+
+  Il tasto si spegne per davvero e la pagina lo dice. Non e' un promemoria:
+  e' l'unica cosa che impedisce di mettere online un tasto che non porta da
+  nessuna parte, e `tests/produzione.test.ts` controlla che quel percorso ci
+  sia ancora.
+-->
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+  /* ── Solo cio' che il sito non ha gia'. Tutto il resto viene da style.css. ── */
+
+  /*
+   * Tre schede, non due con un interruttore: CHIESTO dall'utente il
+   * 25/09/2026 — «preferisco che metti le 3 schede anziche' il tasto mensile
+   * stagione da premere». Un piano che si vede e' un piano che si puo'
+   * scegliere; uno che sta dietro a un tasto lo trova solo chi lo cerca.
+   *
+   * La griglia a tre colonne e' gia' del sito (`.pricing-grid`): qui si
+   * aggiunge solo cosa fare quando lo schermo si stringe.
+   */
+  @media (max-width: 980px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+  .pricing-tag [data-sconto] { font-weight: 700; }
+
+  /* Le righe portano un valore a destra: e' quello che si confronta. */
+  .pricing-features li .val {
+    margin-left: auto; text-align: right; color: var(--text);
+    font-weight: 600; white-space: nowrap; padding-left: .8rem;
+  }
+  .pricing-features li.manca .check { color: #ff5c5c; }
+  .pricing-features li.manca .val { color: var(--text-muted); }
+
+  /*
+   * ── IL LUCCHETTO SULLE RIGHE LIMITATE ───────────────────────────────────
+   *
+   * CHIESTO dall'utente il 26/09/2026: «nella sezione gratis dove ci sono le
+   * limitazioni invece della spunta verde metti un lucchetto».
+   *
+   * Ha ragione: una spunta verde accanto a «10 / 24 ore» dice «ce l'hai», e
+   * quello che conta li' e' invece «ce l'hai fino a un certo punto». Tre segni
+   * diversi per tre stati diversi: spunta verde = illimitato, lucchetto =
+   * c'e' ma con un tetto, crocetta rossa = non c'e'.
+   */
+  .pricing-features li.limite .check { color: var(--text-muted); font-size: .72rem; }
+  .pricing-features li.limite .val { color: var(--green); }
+
+  /*
+   * I centesimi piccoli: il prezzo si legge dal numero intero, e il «,99» e'
+   * il dettaglio che si guarda dopo. Scritto uguale all'euro, lo sguardo li
+   * mette sullo stesso piano e il prezzo sembra piu' alto di quello che e'.
+   */
+  .pricing-price .cent { font-size: .42em; font-weight: 700; letter-spacing: -.01em; }
+
+  .piani-note { display: grid; gap: .9rem; margin-top: 1.4rem; }
+  .piani-nota {
+    background: var(--black2); border: 1px solid var(--border-dim);
+    border-radius: 12px; padding: 1rem 1.2rem;
+    font-size: .88rem; color: var(--text-muted);
+  }
+  .piani-nota b { color: var(--text); font-weight: 600; }
+  .piani-nota.avviso { border-color: rgba(255,92,92,.35); background: rgba(255,92,92,.06); color: #ffb9b9; }
+
+  /*
+   * La barra del sito e' `position: fixed` e alta 65px: senza questo spazio
+   * l'occhiello verde ci finisce sotto. Il 7rem lo tiene largo anche quando la
+   * barra va a due righe su uno schermo stretto.
+   */
+  .piani-sezione { padding: 7rem 1.25rem 4rem; }
+  .piani-testata { text-align: center; max-width: 620px; margin: 0 auto 2.2rem; }
+  .piani-testata .section-title { margin-bottom: .6rem; }
+  .piani-testata p { color: var(--text-muted); font-size: .95rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    Il <span class="mago">Mago</span> di FUT
+    <span class="elite-badge">ELITE</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#promo">Piani</a></li>
+    <li><a href="/servizi">Servizi</a></li>
+    <li><a href="/chi-siamo">Chi siamo</a></li>
+    <li><a href="/servizio-wl-rivals">Servizio WL/Rivals</a></li>
+    <li><a href="/gestione-account">Gestione Account</a></li>
+    <li><a href="/futmago">FUTMAGO</a></li>
+  </ul>
+  <a class="nav-cta" href="/futmago#installa">Installa FUTMAGO</a>
+  <button class="nav-mobile-btn" aria-label="Apri menu" aria-expanded="false">☰</button>
+</nav>
+
+<div class="nav-mobile-panel" id="mobileMenu">
+  <a href="/#promo">Piani</a>
+  <a href="/servizi">Servizi</a>
+  <a href="/chi-siamo">Chi siamo</a>
+  <a href="/servizio-wl-rivals">Servizio WL/Rivals</a>
+  <a href="/gestione-account">Gestione Account</a>
+  <a href="/futmago">FUTMAGO</a>
+  <a href="/futmago#installa" class="nav-cta" style="display:inline-block; margin-top: 0.5rem;">Installa FUTMAGO</a>
+</div>
+
+<main>
+  <section class="piani-sezione">
+    <div class="container">
+      <div class="piani-testata">
+        <span class="section-label">FUTMAGO Premium</span>
+        <h1 class="section-title">I nostri <span class="g">piani</span></h1>
+        <p>Le stesse funzioni della versione gratuita, senza limiti giornalieri.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-name">GRATIS</div>
+          <div class="pricing-desc">Accesso con la propria email.</div>
+          <div class="pricing-price-row">
+            <span class="pricing-price">0<sup>€</sup></span>
+          </div>
+          <div class="pricing-period">per sempre</div>
+          <ul class="pricing-features">
+            <li class="limite"><span class="check">🔒</span> Risolutore automatico SBC <span class="val">10 / 24 ore</span></li>
+            <li class="manca"><span class="check">✕</span> Risolvi la stessa SBC più volte <span class="val">—</span></li>
+            <li class="manca"><span class="check">✕</span> Completa gruppi SBC <span class="val">—</span></li>
+            <li><span class="check">✓</span> SNIPE <span class="val">senza limiti</span></li>
+            <li class="limite"><span class="check">🔒</span> AUTOMAGO <span class="val">1 avvio / 24 ore</span></li>
+            <li class="limite"><span class="check">🔒</span> Album: compra squadre intere <span class="val">3 / 24 ore</span></li>
+            <li><span class="check">✓</span> Calcolo della percentuale di profitto <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Apertura rapida dei pacchetti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Multi relist lista trasferimenti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Prezzi di mercato sulle carte <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Blocca giocatori <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> PC, Mac, iPhone e Android <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Dispositivi <span class="val">2</span></li>
+          </ul>
+          <a class="pricing-cta" href="/futmago#installa">Installa FUTMAGO</a>
+        </div>
+
+        <div class="pricing-card">
+          <div class="pricing-name">MENSILE</div>
+          <div class="pricing-desc">Tutto FUTMAGO senza limiti, mese per mese.</div>
+          <div class="pricing-price-row">
+            <span class="pricing-price">5<span class="cent">,99</span><sup>€</sup></span>
+          </div>
+          <div class="pricing-period">annulla quando vuoi</div>
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> Risolutore automatico SBC <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Risolvi la stessa SBC più volte <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Completa gruppi SBC <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> SNIPE <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> AUTOMAGO <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Album: compra squadre intere <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Calcolo della percentuale di profitto <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Apertura rapida dei pacchetti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Multi relist lista trasferimenti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Prezzi di mercato sulle carte <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Blocca giocatori <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> PC, Mac, iPhone e Android <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Dispositivi <span class="val">2</span></li>
+          </ul>
+          <a class="pricing-cta" data-paga-mese href="#">Abbonati</a>
+        </div>
+
+        <div class="pricing-card featured">
+          <div class="pricing-tag"><span data-sconto>—</span> sulla stagione</div>
+          <div class="pricing-name">STAGIONE FC 27</div>
+          <div class="pricing-desc">Tutto FUTMAGO senza limiti per tutta la stagione.</div>
+          <div class="pricing-price-row">
+            <span class="pricing-price">39<span class="cent">,99</span><sup>€</sup></span>
+          </div>
+          <div class="pricing-period">accesso per tutto FC 27</div>
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> Risolutore automatico SBC <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Risolvi la stessa SBC più volte <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Completa gruppi SBC <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> SNIPE <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> AUTOMAGO <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Album: compra squadre intere <span class="val">senza limiti</span></li>
+            <li><span class="check">✓</span> Calcolo della percentuale di profitto <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Apertura rapida dei pacchetti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Multi relist lista trasferimenti <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Prezzi di mercato sulle carte <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Blocca giocatori <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> PC, Mac, iPhone e Android <span class="val">incluso</span></li>
+            <li><span class="check">✓</span> Dispositivi <span class="val">2</span></li>
+          </ul>
+          <a class="pricing-cta" data-paga-stagione href="#">Acquista</a>
+        </div>
+      </div>
+
+      <div class="piani-note">
+        <div class="piani-nota avviso" data-daFare hidden>
+          <b>Pagina non pronta.</b> I collegamenti al pagamento non sono ancora
+          stati configurati.
+        </div>
+        <div class="piani-nota">
+          <b>Accesso.</b> Avviene tramite email: si riceve un codice da inserire
+          una sola volta. L'account è valido su due dispositivi, modificabili in
+          qualsiasi momento.
+        </div>
+        <div class="piani-nota">
+          <b>Pagamenti.</b> Gestiti da Stripe. I dati della carta non transitano
+          dai nostri sistemi e non vengono conservati.
+        </div>
+        <div class="piani-nota">
+          <b>Durata e disdetta.</b> L'abbonamento mensile si annulla quando vuoi
+          e resta attivo fino al termine del periodo già pagato. Il piano
+          Stagione è un pagamento unico, valido fino al <b>15 settembre 2027</b>:
+          non prevede rinnovi né addebiti successivi.
+        </div>
+        <div class="piani-nota">
+          <b>Come funzionano i limiti.</b> Sono calcolati su una finestra mobile
+          di 24 ore. Vengono conteggiate solo le operazioni completate con
+          successo. Per l'Album il conteggio è per squadra: riaprire una squadra
+          già avviata non consuma un nuovo utilizzo.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Il <span class="g">Mago</span> di FUT</div>
+    <ul class="footer-links">
+      <li><a href="/#promo">Piani</a></li>
+      <li><a href="/servizi">Servizi</a></li>
+      <li><a href="/chi-siamo">Chi siamo</a></li>
+      <li><a href="/come-funziona">Come funziona</a></li>
+      <li><a href="/faq">FAQ</a></li>
+      <li><a href="/futmago">FUTMAGO</a></li>
+      <li><a href="/cookie-policy">Cookie Policy</a></li>
+      <li><a href="https://t.me/ILMAGODIFUT">Telegram</a></li>
+    </ul>
+    <div class="footer-copy">© 2026 Il Mago di FUT · Sito non affiliato con EA Sports. FUTMAGO è uno strumento non ufficiale e non è approvato da EA.</div>
+  </div>
+</footer>
+
+<!--
+  Lo stesso script delle altre pagine: e' lui che apre il menu sul telefono.
+  Senza, la barra qui sopra sarebbe l'unica del sito che non si apre.
+-->
+<script src="/assets/script.js"></script>
+
+<script>
+  /*
+   * ── I DUE COLLEGAMENTI, CREATI SU STRIPE ─────────────────────────
+   *
+   * Sono Payment Link, e sono DIVERSI di proposito:
+   *
+   *   mese      prezzo ricorrente mensile  -> Stripe manda mode: subscription
+   *   stagione  prezzo una tantum          -> Stripe manda mode: payment
+   *
+   * Il webhook guarda quel `mode` per decidere se accendere un rinnovo o un
+   * pass fino al 15 settembre 2027. Metterne uno solo su tutti e due, o
+   * crearli tutti e due come abbonamento, darebbe trentun giorni a chi ha
+   * pagato per una stagione intera.
+   *
+   * Tutti e due raccolgono l'email: e' l'unica cosa che lega il pagamento
+   * all'accesso. Senza, un pagamento non si sa a chi appartenga.
+   */
+  var PAGA_MESE = 'https://buy.stripe.com/00w00kaG931ndJWfK99EI00';
+  var PAGA_STAGIONE = 'https://buy.stripe.com/5kQaEY4hLatPbBO1Tj9EI01';
+
+  /* I prezzi stanno scritti nelle schede: qui servono solo per lo sconto. */
+  var PREZZO_MESE = 5.99;
+  var PREZZO_STAGIONE = 39.99;
+
+  /*
+   * Il risparmio non si scrive a mano: si calcola. Un numero scritto a mano e
+   * un prezzo cambiato dopo sono due cose che prima o poi non tornano, e
+   * quella che l'utente nota e' sempre la percentuale sbagliata.
+   *
+   * Undici mesi dal primo ottobre 2026 al 15 settembre 2027, arrotondati per
+   * difetto: meglio promettere meno.
+   */
+  var MESI_STAGIONE = 11;
+  var sconto = Math.floor((1 - PREZZO_STAGIONE / (PREZZO_MESE * MESI_STAGIONE)) * 100);
+  document.querySelector('[data-sconto]').textContent = '-' + sconto + '%';
+
+  /*
+   * Un tasto morto che sembra vivo e' il difetto peggiore di questa pagina:
+   * chi lo preme crede di aver pagato. Si spegne per davvero.
+   */
+  function accendi(selettore, indirizzo) {
+    var tasto = document.querySelector(selettore);
+    if (indirizzo.indexOf('https://') === 0) {
+      tasto.href = indirizzo;
+      return true;
+    }
+    tasto.removeAttribute('href');
+    tasto.textContent = 'Non ancora disponibile';
+    tasto.style.opacity = '.45';
+    return false;
+  }
+
+  /*
+   * ── IL PAGAMENTO PORTA CON SE' L'ACCOUNT ─────────────────────────────
+   *
+   * Chi arriva da FUTMAGO ha dopo il cancelletto il riferimento del suo
+   * account e la sua email (#rif=...&email=...). Si passano a Stripe:
+   * client_reference_id fa arrivare il Premium a QUELL'account anche se
+   * paga con Apple Pay o PayPal; prefilled_email scrive l'email nel campo.
+   * Chi arriva dal sito non ha niente dopo il cancelletto: link come prima.
+   */
+  function conAccount(indirizzo) {
+    var dati = {};
+    location.hash.replace(/^#/, '').split('&').forEach(function (coppia) {
+      var i = coppia.indexOf('=');
+      if (i > 0) dati[coppia.slice(0, i)] = decodeURIComponent(coppia.slice(i + 1));
+    });
+    var extra = [];
+    if (/^[A-Za-z0-9_-]{1,200}$/.test(dati.rif || '')) extra.push('client_reference_id=' + dati.rif);
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(dati.email || '')) extra.push('prefilled_email=' + encodeURIComponent(dati.email));
+    if (extra.length === 0 || indirizzo.indexOf('https://') !== 0) return indirizzo;
+    return indirizzo + (indirizzo.indexOf('?') >= 0 ? '&' : '?') + extra.join('&');
+  }
+
+  var pronti =
+    accendi('[data-paga-mese]', conAccount(PAGA_MESE)) & accendi('[data-paga-stagione]', conAccount(PAGA_STAGIONE));
+  if (!pronti) document.querySelector('[data-daFare]').hidden = false;
+</script>
+</body>
+</html>
