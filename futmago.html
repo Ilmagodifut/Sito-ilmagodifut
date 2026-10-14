@@ -156,10 +156,34 @@
   .fm-tabella { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: 0.88rem; }
   .fm-tabella td { padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--border-dim); color: var(--text-muted); vertical-align: top; }
   .fm-tabella td:first-child { color: var(--text); width: 42%; }
+  .fm-tabella th { padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--border-dim); text-align: left; vertical-align: top; font-weight: 400; }
+  .fm-tabella th[scope="row"] { color: var(--text); width: 42%; }
+  .fm-tabella th[scope="col"] { color: var(--text-muted); }
+  .fm-nascosto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   @media (max-width: 768px) { .fm-piattaforme { grid-template-columns: 1fr; } }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FUTMAGO",
+  "url": "https://ilmagodifut.com/futmago",
+  "image": "https://ilmagodifut.com/assets/images/og-futmago.jpg",
+  "description": "Estensione per la Web App di EA Sports FC 27: SBC automatizzate, Album della Gallery completati con un click, SNIPE e AUTOMAGO sul mercato. Su computer, iPhone e Android.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Windows, macOS, iOS, Android",
+  "inLanguage": "it",
+  "publisher": { "@type": "Organization", "name": "Il Mago di FUT", "url": "https://ilmagodifut.com/" },
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
+    { "@type": "Offer", "name": "Premium mensile", "price": "5.99", "priceCurrency": "EUR", "url": "https://ilmagodifut.com/premium" },
+    { "@type": "Offer", "name": "Premium stagione FC 27", "price": "39.99", "priceCurrency": "EUR", "url": "https://ilmagodifut.com/premium" }
+  ]
+}
+</script>
 </head>
 <body>
+<a class="salta-al-contenuto" href="#contenuto">Salta al contenuto</a>
 
 <nav>
   <a class='nav-logo' href='/'>
@@ -187,6 +211,8 @@
   <a href='/futmago'>FUTMAGO</a>
   <a href="#installa" class="nav-cta" style="display:inline-block; margin-top: 0.5rem;">Installa FUTMAGO</a>
 </div>
+
+<main id="contenuto">
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
@@ -522,13 +548,14 @@
     <p class="section-desc">Provalo subito, senza registrarti. Con un account gratuito hai più utilizzi ogni giorno; con Premium usi ogni funzione senza limiti. Gli utilizzi si rinnovano 24 ore dopo.</p>
 
     <table class="fm-tabella">
-      <tr><td></td><td><strong>Ospite</strong> · senza account</td><td><strong>Free</strong> · account gratis</td><td><strong>Premium</strong></td></tr>
-      <tr><td>SBC</td><td>3 ogni 24 ore</td><td>10 ogni 24 ore</td><td>Senza limiti</td></tr>
-      <tr><td>SNIPE</td><td>10 ogni 24 ore</td><td>Senza limiti</td><td>Senza limiti</td></tr>
-      <tr><td>Album</td><td>1 squadra ogni 24 ore</td><td>3 squadre ogni 24 ore</td><td>Senza limiti</td></tr>
-      <tr><td>AUTOMAGO</td><td>1 avvio ogni 24 ore</td><td>1 avvio ogni 24 ore</td><td>Senza limiti</td></tr>
-      <tr><td>Soluzioni multiple e Completa tutte</td><td>—</td><td>—</td><td>Sì</td></tr>
-      <tr><td>Prezzo</td><td>Gratis</td><td>Gratis</td><td>5,99 € al mese, oppure 39,99 € per tutta la stagione di FC 27</td></tr>
+      <caption class="fm-nascosto">Limiti e prezzi di FUTMAGO: Ospite, Free e Premium</caption>
+      <tr><td></td><th scope="col"><strong>Ospite</strong> · senza account</th><th scope="col"><strong>Free</strong> · account gratis</th><th scope="col"><strong>Premium</strong></th></tr>
+      <tr><th scope="row">SBC</th><td>3 ogni 24 ore</td><td>10 ogni 24 ore</td><td>Senza limiti</td></tr>
+      <tr><th scope="row">SNIPE</th><td>10 ogni 24 ore</td><td>Senza limiti</td><td>Senza limiti</td></tr>
+      <tr><th scope="row">Album</th><td>1 squadra ogni 24 ore</td><td>3 squadre ogni 24 ore</td><td>Senza limiti</td></tr>
+      <tr><th scope="row">AUTOMAGO</th><td>1 avvio ogni 24 ore</td><td>1 avvio ogni 24 ore</td><td>Senza limiti</td></tr>
+      <tr><th scope="row">Soluzioni multiple e Completa tutte</th><td>—</td><td>—</td><td>Sì</td></tr>
+      <tr><th scope="row">Prezzo</th><td>Gratis</td><td>Gratis</td><td>5,99 € al mese, oppure 39,99 € per tutta la stagione di FC 27</td></tr>
     </table>
 
     <div class="hero-actions" style="justify-content:center;margin-top:2rem">
@@ -577,6 +604,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="footer-inner">

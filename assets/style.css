@@ -11,7 +11,7 @@
   --green-glow: rgba(57,255,20,0.18);
   --green-glow2: rgba(57,255,20,0.06);
   --text:     #F2F2F2;
-  --text-muted: #777777;
+  --text-muted: #8c8c8c; /* contrasto 5,9:1 sul nero: prima #777 era 4,3, sotto il minimo di 4,5 */
   --border:   rgba(57,255,20,0.12);
   --border-dim: rgba(255,255,255,0.06);
 }
@@ -747,4 +747,16 @@ footer {
   .nav-links, .nav-cta { display: none; }
   .nav-mobile-btn { display: block; }
   .nav-mobile-panel { display: flex; }
+}
+
+/* Accessibilita': chi naviga con la tastiera o con un lettore di schermo salta il menu. */
+.salta-al-contenuto {
+  position: absolute; left: 1rem; top: -100px; z-index: 1000;
+  background: var(--green); color: #000; font-weight: 700;
+  padding: 0.6rem 1rem; border-radius: 4px; text-decoration: none;
+}
+.salta-al-contenuto:focus { top: 1rem; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
