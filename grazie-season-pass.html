@@ -69,25 +69,49 @@
   <div class="container thankyou-container">
     <div class="thankyou-check">✓</div>
     <h1 class="thankyou-title">Pagamento <span class="g">completato</span></h1>
-    <p class="thankyou-text">Grazie per essere entrato nella community <strong>Il Mago di FUT ELITE</strong>. Manca un solo passaggio per attivare il tuo accesso.</p>
+    <p class="thankyou-text">Grazie per essere entrato nella community <strong>Il Mago di FUT ELITE</strong>. Manca un solo passaggio: collega il tuo Telegram.</p>
     <div class="thankyou-plan-badge">Iscrizione Season Pass</div>
 
     <div class="thankyou-box">
       <div class="thankyou-step-num">1</div>
-      <div class="thankyou-step-text">Scrivici ora su Telegram con la conferma del pagamento (screenshot o ricevuta PayPal)</div>
+      <div class="thankyou-step-text">Premi <strong>Collega Telegram</strong> qui sotto e poi <strong>Avvia</strong> nel bot @JoinEliteBot</div>
     </div>
     <div class="thankyou-box">
       <div class="thankyou-step-num">2</div>
-      <div class="thankyou-step-text">Ti invieremo subito i link di accesso al canale e gruppo privato Elite</div>
+      <div class="thankyou-step-text">Dal messaggio del bot entra nel canale e nel gruppo Elite con un tocco</div>
     </div>
 
-    <a class="thankyou-cta" href="https://t.me/ILMAGODIFUT" target="_blank" rel="noopener">Scrivici su Telegram → @ILMAGODIFUT</a>
+    <!--
+      Il pulsante porta al bot col codice personale di QUESTO pagamento. Stripe
+      rimanda qui con ?session_id=...; il server Elite lo verifica e risponde col
+      codice monouso. Senza codice il bot apre comunque «Ho gia' pagato».
+    -->
+    <a class="thankyou-cta" id="collega-telegram" href="https://t.me/JoinEliteBot" target="_blank" rel="noopener">Collega Telegram →</a>
 
-    <p class="thankyou-note">Riceverai anche una ricevuta via email direttamente da PayPal. Se hai domande, siamo sempre raggiungibili su Telegram.</p>
+    <p class="thankyou-note">Ti abbiamo mandato anche un'email con lo stesso pulsante, se vuoi collegarti più tardi. Se hai domande, scrivici su Telegram: <a href="https://t.me/ILMAGODIFUT" style="color:var(--green)">@ILMAGODIFUT</a>.</p>
 
     <a class="thankyou-home-link" href="/">← Torna alla home</a>
   </div>
 </section>
+<script>
+  (function () {
+    var id = new URLSearchParams(location.search).get('session_id');
+    if (!id || !/^cs_[A-Za-z0-9_]+$/.test(id)) return;
+    var tentativi = 0;
+    (function chiedi() {
+      fetch('https://futmago-licenza.futmago-api.workers.dev/elite/collega?session_id=' + encodeURIComponent(id))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && /^[A-Za-z0-9_-]{8,64}$/.test(d.codice || '')) {
+            document.getElementById('collega-telegram').href = 'https://t.me/JoinEliteBot?start=' + d.codice;
+          } else if (++tentativi < 15) {
+            setTimeout(chiedi, 2000); /* l'avviso di Stripe puo' arrivare qualche secondo dopo */
+          }
+        })
+        .catch(function () { if (++tentativi < 15) setTimeout(chiedi, 2000); });
+    })();
+  })();
+</script>
 </main>
 
 <footer>
