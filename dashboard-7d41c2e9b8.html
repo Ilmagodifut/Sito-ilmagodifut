@@ -298,6 +298,21 @@
         <p class="sotto">I 30 più recenti del periodo.</p>
         <div class="tabella-wrap tabella-alta" id="tab-pagamenti"></div>
       </section>
+
+      <section class="box c12">
+        <div class="riga-titolo"><h2>Elite su PayPal</h2><span class="sotto" style="margin:0" id="pp-agg"></span></div>
+        <p class="sotto">Gli abbonamenti Elite pagati su PayPal prima del passaggio al sito. Dai file dei movimenti PayPal, contati a mano: non si aggiornano da soli.</p>
+        <div class="griglia" style="gap:12px">
+          <div class="c3 tessera box" style="--i:0"><div class="etichetta">Lordo</div><div class="numero" id="pp-lordo">—</div><div class="dettaglio" id="pp-n">&nbsp;</div></div>
+          <div class="c3 tessera box" style="--i:0"><div class="etichetta">Tariffe PayPal</div><div class="numero" id="pp-tariffe">—</div><div class="dettaglio">Trattenute da PayPal</div></div>
+          <div class="c3 tessera box" style="--i:0"><div class="etichetta">Rimborsi</div><div class="numero" id="pp-rimborsi">—</div><div class="dettaglio" id="pp-rimborsi-d">&nbsp;</div></div>
+          <div class="c3 tessera box" style="--i:0"><div class="etichetta">Netto finale</div><div class="numero" id="pp-netto">—</div><div class="dettaglio">Dopo tariffe e rimborsi</div></div>
+        </div>
+        <div class="griglia" style="margin-top:14px">
+          <div class="c6"><div class="grafico" id="g-paypal-piani"></div></div>
+          <div class="c6"><div class="tabella-wrap" id="tab-paypal-mesi"></div></div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -631,6 +646,7 @@
 
   // ── disegno di tutte le viste dai dati caricati ─────────────────────────
   function disegna() {
+    disegnaPaypal();
     document.querySelectorAll('.link-tabella').forEach(function (b) { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; });
     var PREMIUM = { chiave: 'premium', nome: 'Premium', colore: 'var(--s1)' };
     var FREE = { chiave: 'free', nome: 'Free', colore: 'var(--s2)' };
@@ -757,6 +773,41 @@
     ultimaLarghezza = window.innerWidth;
     clearTimeout(attesaMisura); attesaMisura = setTimeout(function () { animaProssimo = false; disegna(); }, 150);
   });
+
+  // ── Elite su PayPal: numeri fissi dai file dei movimenti ────────────────
+  /*
+   * Contati il 21/10/2026 dai due file «Report attivita'» di PayPal (tutte le
+   * transazioni, 01/09–21/10/2026). Elite riconosciuto dal titolo del
+   * pagamento; il 59,99 «da cellulare» del 04/09 e' un Season Pass (confermato
+   * dal titolare). Esclusi prelievi, conversioni e pagamenti di altri servizi.
+   * Per aggiornarli: un file nuovo da PayPal e si rifanno i conti.
+   */
+  var PAYPAL_ELITE = {
+    aggiornato: '21/10/2026', periodo: '1 settembre – 21 ottobre 2026',
+    pagamenti: 334, lordo: 603666, tariffe: 24729, rimborsi: 23092, nRimborsi: 8,
+    mesi: [
+      { mese: 'Settembre 2026', n: 221, lordo: 424779, netto: 407678 },
+      { mese: 'Ottobre 2026 (1-21)', n: 113, lordo: 178887, netto: 171259 }
+    ],
+    piani: [
+      { nome: 'Mensile 9,99', n: 250, lordo: 249750 },
+      { nome: 'Season Pass', n: 40, lordo: 227960 },
+      { nome: 'Mini 29,99', n: 32, lordo: 95968 },
+      { nome: 'Mini 24,99', n: 12, lordo: 29988 }
+    ]
+  };
+  function disegnaPaypal() {
+    var p = PAYPAL_ELITE;
+    $('pp-agg').textContent = p.periodo + ' · aggiornato al ' + p.aggiornato;
+    mostraNumero('pp-lordo', p.lordo, euroIntero);
+    $('pp-n').textContent = numero(p.pagamenti) + ' pagamenti';
+    mostraNumero('pp-tariffe', p.tariffe, euroIntero);
+    mostraNumero('pp-rimborsi', p.rimborsi, euroIntero);
+    $('pp-rimborsi-d').textContent = p.nRimborsi + ' rimborsi';
+    mostraNumero('pp-netto', p.lordo - p.tariffe - p.rimborsi, euroIntero);
+    barreCategorie('g-paypal-piani', p.piani.map(function (x) { return { nome: x.nome + ' (' + x.n + ')', n: x.lordo }; }), [{ chiave: 'n', nome: 'Lordo', colore: 'var(--s3)' }], euroCorto);
+    tabella('tab-paypal-mesi', ['Mese', 'Pagamenti', 'Lordo', 'Netto'], p.mesi.map(function (m) { return [m.mese, numero(m.n), euro(m.lordo), euro(m.netto)]; }), [0]);
+  }
 
   // ── caricamento ─────────────────────────────────────────────────────────
   function aggiornaTutto() {
