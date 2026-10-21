@@ -22,15 +22,15 @@
 /diventa-un-elite     /                           301
 /home-old             /                           301
 /fifa-ultimate        /                           301
-/gestioni-account     /gestione-account.html      301
-/servizi-wl           /servizio-wl-rivals.html    301
-/servizio-rivals      /servizio-wl-rivals.html    301
-/servizio-gauntlet    /servizi.html               301
-/livello-1            /servizi.html               301
-/livello-2            /servizi.html               301
-/livello-3            /servizi.html               301
-/livello-4            /servizi.html               301
-/livello-5            /servizi.html               301
+/gestioni-account     /gestione-account           301
+/servizi-wl           /servizio-wl-rivals         301
+/servizio-rivals      /servizio-wl-rivals         301
+/servizio-gauntlet    /servizi                    301
+/livello-1            /servizi                    301
+/livello-2            /servizi                    301
+/livello-3            /servizi                    301
+/livello-4            /servizi                    301
+/livello-5            /servizi                    301
 
 # 410 — la pagina non esiste piu' e non ha un'erede: nel sito nuovo il blog non
 # c'e'. 410 vuol dire "tolto apposta", e Google lo cancella prima di un 404.
@@ -51,5 +51,22 @@
 # parte (chi-siamo e chi-siamo.html si dividevano i risultati). Il 301 dice a
 # Google che l'indirizzo e' cambiato per sempre. Il «!» serve perche' il file
 # .html esiste: senza, Netlify lo servirebbe e la regola non partirebbe mai.
-# Prima prova su una pagina sola (21/10/2026), poi su tutte.
-/cookie-policy.html   /cookie-policy   301!
+# Provato prima su una pagina sola il 21/10/2026: 301 e poi 200, nessun giro.
+# Restano fuori le pagine «grazie» (ci rimanda Stripe dopo il pagamento) e
+# installa-userscript.html (passaggio dell installazione su iPhone).
+/chi-siamo.html                             /chi-siamo                              301!
+/come-fare-crediti-fc27.html                /come-fare-crediti-fc27                 301!
+/come-funziona.html                         /come-funziona                          301!
+/compravendita-fc27.html                    /compravendita-fc27                     301!
+/cookie-policy.html                         /cookie-policy                          301!
+/faq.html                                   /faq                                    301!
+/futmago.html                               /futmago                                301!
+/gestione-account.html                      /gestione-account                       301!
+/premium.html                               /premium                                301!
+/servizi.html                               /servizi                                301!
+/servizio-wl-rivals.html                    /servizio-wl-rivals                     301!
+/gruppo-trading-fc27.html                   /gruppo-trading-fc27                    301!
+/gruppo-telegram-compravendita-fc27.html    /gruppo-telegram-compravendita-fc27     301!
+/sbc-automatiche-fc27.html                  /sbc-automatiche-fc27                   301!
+/album-web-app-fc27.html                    /album-web-app-fc27                     301!
+/sniping-fc27.html                          /sniping-fc27                           301!
