@@ -43,3 +43,13 @@
 /blog/*               /index.html                 410
 /post/*               /index.html                 410
 /test                 /index.html                 410
+
+# ── GLI INDIRIZZI .html, DOPO IL PASSAGGIO A QUELLI PULITI (15/10/2026) ─────
+#
+# Dal 15/10 il sito usa /servizi, non /servizi.html: link, canonical e sitemap.
+# Ma i vecchi indirizzi rispondevano ancora, e Search Console li contava a
+# parte (chi-siamo e chi-siamo.html si dividevano i risultati). Il 301 dice a
+# Google che l'indirizzo e' cambiato per sempre. Il «!» serve perche' il file
+# .html esiste: senza, Netlify lo servirebbe e la regola non partirebbe mai.
+# Prima prova su una pagina sola (21/10/2026), poi su tutte.
+/cookie-policy.html   /cookie-policy   301!

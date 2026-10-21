@@ -244,6 +244,11 @@ section { padding: 6rem 2rem; position: relative; z-index: 1; }
 }
 .section-title .g { color: var(--green); }
 .section-desc { color: var(--text-muted); max-width: 500px; line-height: 1.75; font-size: 0.95rem; }
+/* I collegamenti dentro i testi e le schede: verdi come il resto del sito (21/10/2026, prima uscivano blu del browser). */
+.section-desc a, .feature-mini-card a, .card a, .faq-a a { color: var(--green); }
+.feature-mini-card h3 a { text-decoration: none; }
+.section-desc + .section-desc { margin-top: 1rem; }
+.feature-mini-grid + .section-desc, .steps + .section-desc, .section-desc + .feature-mini-grid { margin-top: 1.5rem; }
 
 .elite-banner::before {
   content: '';
@@ -498,7 +503,9 @@ footer {
   font-size: 1.1rem; color: var(--text);
 }
 .footer-logo .g { color: var(--green); }
-.footer-links { display: flex; gap: 1.5rem; list-style: none; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.5rem; list-style: none; }
+/* Le voci non si spezzano a meta': con le guide nuove (21/10/2026) la riga e' lunga, e si va a capo fra una voce e l'altra. */
+.footer-links li { white-space: nowrap; }
 .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
 .footer-links a:hover { color: var(--green); }
 .footer-social { display: flex; gap: 0.75rem; }

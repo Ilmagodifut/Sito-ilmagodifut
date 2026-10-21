@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="FUTMAGO: SBC, Album, SNIPE e AUTOMAGO dentro la Web App di EA Sports FC 27. Gratis per provarlo, Premium senza limiti. Computer, iPhone e Android.">
+<meta name="description" content="FUTMAGO, il tuo assistente direttamente dentro la Web App di FC 27: SBC automatiche, album e gallery da Web App, sniping e autobuyer sul mercato. Gratis da provare.">
 <meta name="robots" content="index, follow">
-<title>FUTMAGO per FC 27 | Il Mago di FUT</title>
+<title>FUTMAGO: il tuo assistente nella Web App FC 27</title>
 <link rel="canonical" href="https://ilmagodifut.com/futmago">
 
 <!--
@@ -23,14 +23,14 @@
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ilmagodifut.com/futmago">
-<meta property="og:title" content="FUTMAGO | Il Mago di FUT">
+<meta property="og:title" content="FUTMAGO: il tuo assistente nella Web App FC 27">
 <meta property="og:description" content="SBC automatizzate, Album della Gallery e sniping del mercato, direttamente nella Web App di EA FC 27. Su computer, iPhone e Android.">
 <meta property="og:locale" content="it_IT">
 <meta property="og:image" content="https://ilmagodifut.com/assets/images/og-futmago.jpg?v=fc27">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="FUTMAGO | Il Mago di FUT">
+<meta name="twitter:title" content="FUTMAGO: il tuo assistente nella Web App FC 27">
 <meta name="twitter:description" content="SBC automatizzate, Album della Gallery e sniping del mercato, direttamente nella Web App di EA FC 27. Su computer, iPhone e Android.">
 <meta name="twitter:image" content="https://ilmagodifut.com/assets/images/og-futmago.jpg?v=fc27">
 <meta property="og:site_name" content="Il Mago di FUT">
@@ -120,6 +120,9 @@
                             border: 1px solid rgba(57,255,20,0.18); background: #0d1117; }
   .fm-schermata-larga figcaption { margin-top: 0.5rem; font-size: 0.78rem; color: #9fb0c0; }
 
+  /* I loghi veri dei browser e dei sistemi al posto delle emoji (chiesto il 21/10/2026). Browser: loghi originali da alrra/browser-logos (MIT); Apple e Android da Simple Icons. */
+  .fm-loghi { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 1rem; }
+  .fm-loghi svg, .fm-loghi img { width: 34px; height: 34px; display: block; }
   .fm-piattaforme { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 3rem; }
   .fm-tab-btn { cursor: pointer; transition: border-color .2s, box-shadow .2s; }
   .fm-tab-btn.scelta { border-color: var(--green); box-shadow: 0 0 22px var(--green-glow); }
@@ -169,7 +172,7 @@
   "name": "FUTMAGO",
   "url": "https://ilmagodifut.com/futmago",
   "image": "https://ilmagodifut.com/assets/images/og-futmago.jpg",
-  "description": "Estensione per la Web App di EA Sports FC 27: SBC automatizzate, Album della Gallery completati con un click, SNIPE e AUTOMAGO sul mercato. Su computer, iPhone e Android.",
+  "description": "Il tuo assistente direttamente dentro la Web App di EA Sports FC 27: SBC automatiche, album e gallery da Web App, SNIPE e AUTOMAGO (autobuyer) sul mercato. Su computer, iPhone e Android.",
   "applicationCategory": "GameApplication",
   "operatingSystem": "Windows, macOS, iOS, Android",
   "inLanguage": "it",
@@ -178,6 +181,78 @@
     { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
     { "@type": "Offer", "name": "Premium mensile", "price": "5.99", "priceCurrency": "EUR", "url": "https://ilmagodifut.com/premium" },
     { "@type": "Offer", "name": "Premium stagione FC 27", "price": "39.99", "priceCurrency": "EUR", "url": "https://ilmagodifut.com/premium" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Cos'è FUTMAGO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Il tuo assistente direttamente dentro la Web App di EA Sports FC 27. Risolve le SBC con le carte del tuo club a partire da quelle che valgono meno, completa gli album della Gallery da Web App e fa sniping sul mercato con SNIPE e AUTOMAGO. Si prova gratis."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Si possono fare gli album e la Gallery da Web App?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sì. Con FUTMAGO nella Web App compare la voce ALBUM: per ogni squadra vedi punteggio, gradi e costo del grado successivo, e compri le carte che mancano. Tutti i dettagli nella pagina album e gallery da Web App."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "FUTMAGO è un autobuyer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AUTOMAGO sì: ripete la ricerca sul mercato al posto tuo, compra fino al numero di carte che decidi e può rimetterle in vendita. SNIPE invece compra in un solo tocco. Vedi la pagina sullo sniping."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ho premuto il pulsante e non succede niente",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ricarica la Web App e riprova. Se usi il segnalibro, va ripremuto ogni volta che la pagina si ricarica. Se il pannello proprio non compare, controlla di essere sulla Web App di EA e non sull'app del telefono: FUTMAGO funziona solo dentro la Web App nel browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "FUTMAGO dice che una carta è in prestito",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "EA non accetta una rosa che contiene giocatori in prestito: la rifiuta senza dire perché. FUTMAGO se ne accorge prima e te lo dice. Scarta quelle carte o rendile tue, poi rigenera la soluzione."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Perché non riesco ad aprire più di un pacchetto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "EA non apre un pacchetto se hai oggetti non assegnati in sospeso. Nelle impostazioni dell'apertura scegli dove mandare le carte — al club o in archivio — e la sequenza andrà avanti da sola."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso usarlo su più dispositivi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sì. Entra con la stessa email su ogni dispositivo: il tuo piano ti segue. Puoi averlo su due dispositivi insieme, e dalla pagina dell'account puoi scollegarne uno quando cambi telefono o computer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Come vi segnalo un problema?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Scrivi su Telegram a @ILMAGODIFUT. Dicci cosa stavi facendo, su quale dispositivo, e cosa è comparso a schermo: con quelle tre cose si risolve quasi sempre."
+      }
+    }
   ]
 }
 </script>
@@ -248,19 +323,19 @@
 
     <div class="fm-piattaforme">
       <div class="card fm-tab-btn" data-guida="desktop">
-        <div class="card-icon">💻</div>
+        <div class="fm-loghi"><img src="/assets/loghi/chrome.svg" alt="Chrome" title="Chrome" width="34" height="34"><img src="/assets/loghi/edge.svg" alt="Edge" title="Edge" width="34" height="34"><img src="/assets/loghi/brave.svg" alt="Brave" title="Brave" width="34" height="34"><img src="/assets/loghi/opera.svg" alt="Opera" title="Opera" width="34" height="34"><img src="/assets/loghi/firefox.svg" alt="Firefox" title="Firefox" width="34" height="34"></div>
         <h3>Computer</h3>
         <p>Chrome, Edge, Brave, Opera o Firefox su Windows e Mac. È la strada più semplice: si installa una volta e resta sempre attivo.</p>
         <span class="card-tag">Consigliata</span>
       </div>
       <div class="card fm-tab-btn" data-guida="iphone">
-        <div class="card-icon">📱</div>
+        <div class="fm-loghi"><svg viewBox="0 0 24 24" role="img" aria-label="Apple"><title>Apple</title><path fill="#F5F5F7" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></div>
         <h3>iPhone e iPad</h3>
         <p>Su Safari, con l'app gratuita Userscripts. Si prepara una volta sola, poi FUTMAGO parte da solo.</p>
         <span class="card-tag">2 minuti</span>
       </div>
       <div class="card fm-tab-btn" data-guida="android">
-        <div class="card-icon">🤖</div>
+        <div class="fm-loghi"><svg viewBox="0 0 24 24" role="img" aria-label="Android"><title>Android</title><path fill="#3DDC84" d="M18.4395 5.5586c-.675 1.1664-1.352 2.3318-2.0274 3.498-.0366-.0155-.0742-.0286-.1113-.043-1.8249-.6957-3.484-.8-4.42-.787-1.8551.0185-3.3544.4643-4.2597.8203-.084-.1494-1.7526-3.021-2.0215-3.4864a1.1451 1.1451 0 0 0-.1406-.1914c-.3312-.364-.9054-.4859-1.379-.203-.475.282-.7136.9361-.3886 1.5019 1.9466 3.3696-.0966-.2158 1.9473 3.3593.0172.031-.4946.2642-1.3926 1.0177C2.8987 12.176.452 14.772 0 18.9902h24c-.119-1.1108-.3686-2.099-.7461-3.0683-.7438-1.9118-1.8435-3.2928-2.7402-4.1836a12.1048 12.1048 0 0 0-2.1309-1.6875c.6594-1.122 1.312-2.2559 1.9649-3.3848.2077-.3615.1886-.7956-.0079-1.1191a1.1001 1.1001 0 0 0-.8515-.5332c-.5225-.0536-.9392.3128-1.0488.5449zm-.0391 8.461c.3944.5926.324 1.3306-.1563 1.6503-.4799.3197-1.188.0985-1.582-.4941-.3944-.5927-.324-1.3307.1563-1.6504.4727-.315 1.1812-.1086 1.582.4941zM7.207 13.5273c.4803.3197.5506 1.0577.1563 1.6504-.394.5926-1.1038.8138-1.584.4941-.48-.3197-.5503-1.0577-.1563-1.6504.4008-.6021 1.1087-.8106 1.584-.4941z"/></svg></div>
         <h3>Android</h3>
         <p>Con Firefox parte da solo, e si prepara una volta sola. Con Chrome serve il segnalibro, perché Chrome su Android non ha le estensioni.</p>
         <span class="card-tag">2 strade</span>
@@ -491,31 +566,35 @@
   <div class="container">
     <span class="section-label">Cosa fa</span>
     <h2 class="section-title">Più tempo per giocare, <span class="g">meno crediti sprecati</span></h2>
+    <p class="section-desc">FUTMAGO è il tuo assistente direttamente dentro la Web App di EA Sports FC 27: si installa nel browser e aggiunge alla Web App di EA il risolutore delle SBC, la pagina degli album della Gallery e gli strumenti di sniping del mercato. Non è un programma da scaricare sul computer e non ti chiede la password: lavora dentro la pagina che apri tu.</p>
 
     <div class="servizi-grid">
       <div class="card">
-        <div class="card-icon">🧙</div>
-        <h3>Risolve le SBC</h3>
-        <p>Con un tocco FUTMAGO trova la rosa che soddisfa ogni requisito usando le carte del tuo club, a partire da quelle che valgono meno. Gestisce anche le nuove SBC a punteggio: scegli tu se spendere meno crediti o meno carte.</p>
-        <span class="card-tag">Anche più soluzioni</span>
-      </div>
-      <div class="card">
-        <div class="card-icon">⚡</div>
-        <h3>Completa un set intero</h3>
-        <p>COMPLETA TUTTE risolve in sequenza tutte le sfide di un set e ti mostra ogni rosa prima dell'invio.</p>
-        <span class="card-tag">Con anteprima</span>
-      </div>
-      <div class="card">
         <div class="card-icon">🖼️</div>
-        <h3>Album</h3>
+        <h3>Album disponibile su Web App</h3>
         <p>Completa la Gallery con una strategia, non a tentativi. Per ogni squadra vedi punteggio, gradi raggiunti e costo esatto del grado successivo; FUTMAGO ti indica gli album che rendono più gettoni per ogni credito speso e acquista le carte mancanti al miglior prezzo disponibile.</p>
         <span class="card-tag">Gettoni Gallery</span>
+        <p style="margin-top:0.8rem;"><a href="/album-web-app-fc27">Album e gallery da Web App →</a></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧙</div>
+        <h3>Risoluzioni SBC automatiche</h3>
+        <p>Con un tocco FUTMAGO trova la rosa che soddisfa ogni requisito usando le carte del tuo club, a partire da quelle che valgono meno. Gestisce anche le nuove SBC a punteggio: scegli tu se spendere meno crediti o meno carte.</p>
+        <span class="card-tag">Anche più soluzioni</span>
+        <p style="margin-top:0.8rem;"><a href="/sbc-automatiche-fc27">Le SBC automatiche in dettaglio →</a></p>
       </div>
       <div class="card">
         <div class="card-icon">🎯</div>
         <h3>SNIPE e AUTOMAGO</h3>
         <p>Sul mercato le occasioni durano pochi secondi. SNIPE cerca e acquista in un solo tocco la carta che vuoi, se è sotto il tuo prezzo. AUTOMAGO ripete la ricerca al posto tuo, compra fino al numero di carte che decidi e può rimetterle subito in vendita al prezzo che hai impostato.</p>
         <span class="card-tag">Acquisti automatici</span>
+        <p style="margin-top:0.8rem;"><a href="/sniping-fc27">Lo sniping in dettaglio →</a></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Completa un set intero</h3>
+        <p>COMPLETA TUTTE risolve in sequenza tutte le sfide di un set e ti mostra ogni rosa prima dell'invio.</p>
+        <span class="card-tag">Con anteprima</span>
       </div>
       <div class="card">
         <div class="card-icon">💰</div>
@@ -582,6 +661,18 @@
 
     <div class="faq-list">
       <div class="faq-item">
+        <div class="faq-q">Cos'è FUTMAGO?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">Il tuo assistente direttamente dentro la Web App di EA Sports FC 27. Risolve le SBC con le carte del tuo club a partire da quelle che valgono meno, completa gli album della Gallery da Web App e fa sniping sul mercato con SNIPE e AUTOMAGO. Si prova gratis.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Si possono fare gli album e la Gallery da Web App?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">Sì. Con FUTMAGO nella Web App compare la voce ALBUM: per ogni squadra vedi punteggio, gradi e costo del grado successivo, e compri le carte che mancano. Tutti i dettagli nella pagina <a href="/album-web-app-fc27">album e gallery da Web App</a>.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">FUTMAGO è un autobuyer?<span class="icon">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">AUTOMAGO sì: ripete la ricerca sul mercato al posto tuo, compra fino al numero di carte che decidi e può rimetterle in vendita. SNIPE invece compra in un solo tocco. Vedi la pagina sullo <a href="/sniping-fc27">sniping</a>.</div></div>
+      </div>
+      <div class="faq-item">
         <div class="faq-q">Ho premuto il pulsante e non succede niente<span class="icon">+</span></div>
         <div class="faq-a"><div class="faq-a-inner">Ricarica la Web App e riprova. Se usi il segnalibro, va ripremuto ogni volta che la pagina si ricarica. Se il pannello proprio non compare, controlla di essere sulla Web App di EA e non sull'app del telefono: FUTMAGO funziona solo dentro la Web App nel browser.</div></div>
       </div>
@@ -617,6 +708,10 @@
       <li><a href='/come-funziona'>Come funziona</a></li>
       <li><a href='/faq'>FAQ</a></li>
       <li><a href='/futmago'>FUTMAGO</a></li>
+      <li><a href='/sbc-automatiche-fc27'>SBC automatiche FC 27</a></li>
+      <li><a href='/album-web-app-fc27'>Album da Web App</a></li>
+      <li><a href='/sniping-fc27'>Sniping FC 27</a></li>
+      <li><a href='/gruppo-trading-fc27'>Gruppo trading FC27</a></li>
       <li><a href='/cookie-policy'>Cookie Policy</a></li>
       <li><a href="https://t.me/ILMAGODIFUT">Telegram</a></li>
     </ul>
