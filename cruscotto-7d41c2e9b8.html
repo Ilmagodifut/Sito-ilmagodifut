@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cruscotto FUTMAGO</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cruscotto">
+<link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/futmago-icona-32.png">
+<!--
+  IL CRUSCOTTO DEL TITOLARE: FUTMAGO ED ELITE (CHIESTO il 21/10/2026).
+
+  Indirizzo nascosto come l'Assistenza: fuori dalla sitemap, noindex, non
+  collegato da nessuna pagina. La protezione e' la ADMIN_SECRET: il server
+  rifiuta tutto senza, e dopo 10 chiavi sbagliate in un'ora blocca la rete.
+
+  Dati     POST /v1/cruscotto { parte: giorni|conti|uso|elite|incassi|utente, giorni, email }
+  Azioni   le stesse dell'Assistenza: /v1/regalo, /v1/sposta, /v1/sblocca-cambi, e /elite/giro
+-->
+<style>
+  :root {
+    color-scheme: dark;
+    --fondo: #0b0f15; --scheda: #12161d; --scheda-2: #161b23; --bordo: #2a3442; --griglia: #222b36;
+    --testo: #e8eef5; --testo-2: #b4c0cd; --spento: #8796a8;
+    --verde: #39ff7a;
+    /* Serie dei grafici: tavolozza validata sullo sfondo delle schede (#12161d). */
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --buono: #0ca30c; --attenzione: #fab219; --critico: #d03b3b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--testo); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .pagina { max-width: 1240px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 18px; }
+  header.testa { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: space-between; }
+  h1 { margin: 0; font-size: 1.5rem; letter-spacing: .01em; }
+  h1 .v { color: var(--verde); }
+  .comandi { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .comandi form { margin: 0; }
+  input, select { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--bordo); background: #0d1117; color: var(--testo); font: inherit; min-width: 0; }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--verde); outline-offset: 1px; }
+  button { padding: 10px 16px; border-radius: 9px; border: none; font: 800 14px system-ui, sans-serif; cursor: pointer; background: var(--verde); color: #000; }
+  button.neutro { background: #1b222c; color: var(--testo); border: 1px solid var(--bordo); font-weight: 700; }
+  button:disabled { opacity: .5; cursor: default; }
+  .segmenti { display: inline-flex; border: 1px solid var(--bordo); border-radius: 9px; overflow: hidden; }
+  .segmenti button { border-radius: 0; background: transparent; color: var(--testo-2); font-weight: 700; padding: 9px 14px; }
+  .segmenti button[aria-pressed="true"] { background: #1f2a37; color: var(--testo); }
+  .stato-generale { color: var(--spento); font-size: .85rem; }
+  nav.schede { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--bordo); }
+  nav.schede button { background: transparent; color: var(--testo-2); border-radius: 9px 9px 0 0; padding: 10px 16px; font-weight: 700; }
+  nav.schede button[aria-selected="true"] { color: var(--testo); box-shadow: inset 0 -2px 0 var(--verde); }
+  .vista { display: none; gap: 18px; }
+  .vista.attiva { display: grid; }
+  .griglia { display: grid; gap: 18px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c6 { grid-column: span 6; } .c4 { grid-column: span 4; } .c3 { grid-column: span 3; }
+  @media (max-width: 980px) { .c8, .c6, .c4 { grid-column: span 12; } .c3 { grid-column: span 6; } }
+  @media (max-width: 560px) { .c3 { grid-column: span 12; } }
+  section.box { background: var(--scheda); border: 1px solid var(--bordo); border-radius: 14px; padding: 16px 18px; min-width: 0; }
+  section.box h2 { margin: 0; font-size: 1.02rem; }
+  .sotto { color: var(--spento); font-size: .85rem; margin: 2px 0 12px; }
+  .riga-titolo { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+  .link-tabella { background: none; border: none; color: var(--testo-2); padding: 0; font: 600 .82rem system-ui, sans-serif; text-decoration: underline; cursor: pointer; }
+  /* Le tessere dei numeri */
+  .tessera .etichetta { color: var(--testo-2); font-size: .85rem; font-weight: 600; }
+  .tessera .numero { font-size: 2rem; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .tessera .dettaglio { color: var(--spento); font-size: .82rem; margin-top: 2px; }
+  .vuoto { color: var(--spento); font-size: .9rem; padding: 18px 0; }
+  .avviso { border-left: 3px solid var(--attenzione); background: rgba(250,178,25,.07); padding: 10px 12px; border-radius: 6px; color: var(--testo-2); font-size: .88rem; }
+  .avviso strong { color: var(--testo); }
+  /* Grafici */
+  .grafico { position: relative; }
+  .grafico svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .grafico text { fill: var(--spento); font: 11px system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .legenda { display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 8px; font-size: .82rem; color: var(--testo-2); }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .suggerimento { position: absolute; pointer-events: none; background: #0d1117; border: 1px solid var(--bordo); border-radius: 8px; padding: 8px 10px; font-size: .82rem; color: var(--testo); box-shadow: 0 8px 24px rgba(0,0,0,.45); white-space: nowrap; z-index: 5; display: none; }
+  .suggerimento b { display: block; margin-bottom: 3px; }
+  .suggerimento .r { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+  .suggerimento i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 6px; }
+  /* Tabelle */
+  .tabella-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .88rem; }
+  th, td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--griglia); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--spento); font-weight: 600; font-size: .8rem; position: sticky; top: 0; background: var(--scheda); }
+  td.sinistra, th.sinistra { text-align: left; }
+  .tabella-alta { max-height: 380px; overflow: auto; }
+  .etichetta-stato { display: inline-flex; gap: 5px; align-items: center; font-weight: 700; font-size: .8rem; }
+  .etichetta-stato.ok { color: var(--buono); } .etichetta-stato.att { color: var(--attenzione); } .etichetta-stato.ko { color: #ff8a8a; }
+  /* Moduli e azioni */
+  label { display: block; font-weight: 600; margin: 10px 0 4px; font-size: .9rem; }
+  .campo { width: 100%; }
+  .fila { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .fila > button { flex: 1 1 160px; }
+  .esito { margin-top: 10px; padding: 9px 11px; border-radius: 9px; font-weight: 600; display: none; font-size: .9rem; }
+  .esito.ok { display: block; background: #16301f; border: 1px solid #2b6b41; color: var(--verde); }
+  .esito.ko { display: block; background: #3a1d1d; border: 1px solid #6b2b2b; color: #ff9d9d; }
+  .scheda-utente dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 0; font-size: .9rem; }
+  .scheda-utente dt { color: var(--spento); }
+  .scheda-utente dd { margin: 0; }
+  .nascosto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="testa">
+    <h1>Cruscotto <span class="v">FUTMAGO</span> · Elite</h1>
+    <div class="comandi">
+      <form onsubmit="return false">
+        <input type="text" name="username" autocomplete="username" value="admin-futmago" style="display:none">
+        <label class="nascosto" for="chiave">Chiave admin</label>
+        <input type="password" id="chiave" name="password" autocomplete="current-password" placeholder="ADMIN_SECRET" size="18">
+      </form>
+      <div class="segmenti" role="group" aria-label="Periodo">
+        <button type="button" data-giorni="7" aria-pressed="false">7 giorni</button>
+        <button type="button" data-giorni="30" aria-pressed="true">30 giorni</button>
+        <button type="button" data-giorni="90" aria-pressed="false">90 giorni</button>
+      </div>
+      <button type="button" id="aggiorna">Aggiorna tutto</button>
+    </div>
+  </header>
+  <div class="stato-generale" id="stato-generale">Scrivi la chiave e premi «Aggiorna tutto».</div>
+
+  <nav class="schede" role="tablist">
+    <button type="button" role="tab" aria-selected="true" data-vista="panoramica">Panoramica</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="futmago">FUTMAGO</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="elite">Elite</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="incassi">Incassi</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="assistenza">Utenti e assistenza</button>
+  </nav>
+
+  <!-- ═══ PANORAMICA ═══ -->
+  <div class="vista attiva" id="vista-panoramica">
+    <div class="griglia">
+      <section class="box tessera c3"><div class="etichetta">Utenti oggi</div><div class="numero" id="t-oggi">—</div><div class="dettaglio" id="t-oggi-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Account FUTMAGO</div><div class="numero" id="t-conti">—</div><div class="dettaglio" id="t-conti-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Abbonati Elite attivi</div><div class="numero" id="t-elite">—</div><div class="dettaglio" id="t-elite-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Incassi del mese</div><div class="numero" id="t-incassi">—</div><div class="dettaglio" id="t-incassi-d">&nbsp;</div></section>
+
+      <section class="box c8">
+        <div class="riga-titolo"><h2>Utenti attivi al giorno</h2><button class="link-tabella" data-tabella="g-attivi">Vedi tabella</button></div>
+        <p class="sotto">Account che hanno aperto FUTMAGO, ora italiana. Chi usa PC e telefono conta una volta.</p>
+        <div class="grafico" id="g-attivi"></div>
+      </section>
+      <section class="box c4">
+        <div class="riga-titolo"><h2>Account per piano</h2><button class="link-tabella" data-tabella="g-piani">Vedi tabella</button></div>
+        <p class="sotto">Tutti gli account di FUTMAGO, adesso.</p>
+        <div class="grafico" id="g-piani"></div>
+      </section>
+      <section class="box c6">
+        <div class="riga-titolo"><h2>Nuovi account al giorno</h2><button class="link-tabella" data-tabella="g-nuovi">Vedi tabella</button></div>
+        <p class="sotto">Account creati ogni giorno (prima volta che qualcuno entra con la sua email).</p>
+        <div class="grafico" id="g-nuovi"></div>
+      </section>
+      <section class="box c6">
+        <div class="riga-titolo"><h2>Incassi al giorno</h2><button class="link-tabella" data-tabella="g-incassi-mini">Vedi tabella</button></div>
+        <p class="sotto">Pagamenti Stripe al netto dei rimborsi, FUTMAGO ed Elite.</p>
+        <div class="grafico" id="g-incassi-mini"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ FUTMAGO ═══ -->
+  <div class="vista" id="vista-futmago">
+    <div class="griglia">
+      <section class="box tessera c3"><div class="etichetta">Paganti</div><div class="numero" id="f-paganti">—</div><div class="dettaglio" id="f-paganti-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Visti negli ultimi 7 giorni</div><div class="numero" id="f-visti7">—</div><div class="dettaglio" id="f-visti-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Dispositivi collegati</div><div class="numero" id="f-disp">—</div><div class="dettaglio" id="f-disp-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Free al limite (periodo)</div><div class="numero" id="f-limite">—</div><div class="dettaglio" id="f-limite-d">&nbsp;</div></section>
+
+      <section class="box c12" id="avviso-uso" hidden><div class="avviso"><strong>L'uso delle funzioni si conta dal giorno della pubblicazione del server aggiornato.</strong> Prima non veniva salvato: i giorni precedenti risultano vuoti. Si contano gli account (Free e Premium); chi usa FUTMAGO da ospite, senza account, no.</div></section>
+
+      <section class="box c6">
+        <div class="riga-titolo"><h2>Uso delle funzioni</h2><button class="link-tabella" data-tabella="g-funzioni">Vedi tabella</button></div>
+        <p class="sotto">Quante volte è stata usata ogni funzione nel periodo, Premium e Free.</p>
+        <div class="grafico" id="g-funzioni"></div>
+      </section>
+      <section class="box c6">
+        <div class="riga-titolo"><h2>Limiti toccati dai Free</h2><button class="link-tabella" data-tabella="g-limiti">Vedi tabella</button></div>
+        <p class="sotto">Volte in cui un Free ha voluto usare una funzione e il limite giornaliero ha detto no: lì il Premium serve davvero.</p>
+        <div class="grafico" id="g-limiti"></div>
+      </section>
+      <section class="box c12">
+        <div class="riga-titolo"><h2>Uso al giorno</h2><button class="link-tabella" data-tabella="g-uso-giorni">Vedi tabella</button></div>
+        <p class="sotto">Tutte le funzioni sommate, per giorno.</p>
+        <div class="grafico" id="g-uso-giorni"></div>
+      </section>
+      <section class="box c6">
+        <h2>Premium in scadenza</h2>
+        <p class="sotto">Pass di stagione e regali che finiscono nei prossimi 14 giorni (i mensili si rinnovano da soli).</p>
+        <div class="tabella-wrap tabella-alta" id="tab-scadenze"></div>
+      </section>
+      <section class="box c6">
+        <h2>Ultimi account creati</h2>
+        <p class="sotto">I 20 più recenti, col piano di adesso.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-ultimi"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ ELITE ═══ -->
+  <div class="vista" id="vista-elite">
+    <div class="griglia">
+      <section class="box tessera c3"><div class="etichetta">Attivi</div><div class="numero" id="e-attivi">—</div><div class="dettaglio" id="e-attivi-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">Con la disdetta fatta</div><div class="numero" id="e-disdetti">—</div><div class="dettaglio">Escono alla scadenza</div></section>
+      <section class="box tessera c3"><div class="etichetta">Telegram non collegato</div><div class="numero" id="e-noncoll">—</div><div class="dettaglio">Hanno pagato ma non sono entrati</div></section>
+      <section class="box tessera c3"><div class="etichetta">Vecchi iscritti PayPal</div><div class="numero" id="e-paypal">—</div><div class="dettaglio" id="e-paypal-d">&nbsp;</div></section>
+
+      <section class="box c4">
+        <div class="riga-titolo"><h2>Abbonati per piano</h2><button class="link-tabella" data-tabella="g-elite-piani">Vedi tabella</button></div>
+        <p class="sotto">Abbonamenti dal sito, attivi adesso.</p>
+        <div class="grafico" id="g-elite-piani"></div>
+      </section>
+      <section class="box c8">
+        <div class="riga-titolo"><h2>Scadenze della lista PayPal</h2><button class="link-tabella" data-tabella="g-paypal">Vedi tabella</button></div>
+        <p class="sotto">Quanti vecchi iscritti PayPal scadono in ogni data: chi non passa al sito esce il giorno dopo.</p>
+        <div class="grafico" id="g-paypal"></div>
+      </section>
+      <section class="box c6">
+        <h2>In scadenza nei prossimi 7 giorni</h2>
+        <p class="sotto">Abbonati dal sito che scadono a breve.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-elite-scadenze"></div>
+      </section>
+      <section class="box c6">
+        <h2>Giro delle scadenze</h2>
+        <p class="sotto">Il bot lo fa da solo ogni ora: toglie da canale e gruppo chi è scaduto. Qui lo fai partire subito.</p>
+        <div class="fila"><button type="button" id="giro" class="neutro">Fai il giro adesso</button></div>
+        <div class="esito" id="esito-giro"></div>
+      </section>
+      <section class="box c12">
+        <div class="riga-titolo"><h2>Tutti gli abbonati dal sito</h2><input type="search" id="filtro-elite" placeholder="Cerca email o @username" aria-label="Cerca fra gli abbonati Elite"></div>
+        <div class="tabella-wrap tabella-alta" id="tab-elite" style="margin-top:10px"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ INCASSI ═══ -->
+  <div class="vista" id="vista-incassi">
+    <div class="griglia">
+      <section class="box c12" id="avviso-incassi" hidden><div class="avviso" id="avviso-incassi-testo"></div></section>
+      <section class="box tessera c3"><div class="etichetta">Totale periodo</div><div class="numero" id="i-totale">—</div><div class="dettaglio" id="i-totale-d">&nbsp;</div></section>
+      <section class="box tessera c3"><div class="etichetta">FUTMAGO Premium</div><div class="numero" id="i-futmago">—</div><div class="dettaglio">Nel periodo</div></section>
+      <section class="box tessera c3"><div class="etichetta">Elite</div><div class="numero" id="i-elite">—</div><div class="dettaglio">Nel periodo</div></section>
+      <section class="box tessera c3"><div class="etichetta">Rimborsi</div><div class="numero" id="i-rimborsi">—</div><div class="dettaglio">Nel periodo</div></section>
+      <section class="box c12">
+        <div class="riga-titolo"><h2>Incassi al giorno</h2><button class="link-tabella" data-tabella="g-incassi">Vedi tabella</button></div>
+        <p class="sotto">Al netto dei rimborsi. Il servizio si riconosce dal prezzo (FUTMAGO 5,99 e 39,99; Elite 9,99, 24,99 e 49,99).</p>
+        <div class="grafico" id="g-incassi"></div>
+      </section>
+      <section class="box c12">
+        <h2>Ultimi pagamenti</h2>
+        <p class="sotto">I 30 più recenti del periodo.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-pagamenti"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ UTENTI E ASSISTENZA ═══ -->
+  <div class="vista" id="vista-assistenza">
+    <div class="griglia">
+      <section class="box c12 scheda-utente">
+        <h2>Cerca un utente</h2>
+        <p class="sotto">Per email: piano FUTMAGO, scadenza, dispositivi, usi di oggi ed Elite.</p>
+        <div class="fila" style="margin-top:0"><input type="email" id="cerca-email" class="campo" placeholder="nome@email.it" style="flex:3 1 240px"><button type="button" id="cerca" style="flex:1 1 120px">Cerca</button></div>
+        <div class="esito" id="esito-cerca"></div>
+        <div id="scheda"></div>
+      </section>
+      <section class="box c6">
+        <h2>Regala Premium</h2>
+        <p class="sotto">A un amico, a un creator, a chi ha avuto un problema. Il regalo non si rinnova: finisce da solo.</p>
+        <label for="regalo-email">Email (quella con cui entra in FUTMAGO)</label>
+        <input type="email" id="regalo-email" class="campo" placeholder="nome@email.it">
+        <label for="regalo-durata">Durata</label>
+        <select id="regalo-durata" class="campo">
+          <option value="7">7 giorni</option>
+          <option value="30" selected>30 giorni</option>
+          <option value="90">3 mesi</option>
+          <option value="fino-2027-09-15">Fino al 15 settembre 2027</option>
+          <option value="0">Per sempre</option>
+        </select>
+        <div class="fila"><button type="button" id="regala">Regala Premium</button><button type="button" id="togli" class="neutro">Togli Premium</button></div>
+        <div class="esito" id="esito-regalo"></div>
+      </section>
+      <section class="box c6">
+        <h2>Sposta Premium</h2>
+        <p class="sotto">Per chi ha pagato con un'email (per esempio Apple Pay o PayPal) e usa FUTMAGO con un'altra. Prima controlla su Stripe che il pagamento ci sia.</p>
+        <label for="da">Da (email con cui ha pagato)</label>
+        <input type="email" id="da" class="campo" placeholder="mario@icloud.com">
+        <label for="a">A (email con cui entra in FUTMAGO)</label>
+        <input type="email" id="a" class="campo" placeholder="mario@gmail.com">
+        <div class="fila"><button type="button" id="sposta">Sposta Premium</button></div>
+        <div class="esito" id="esito-sposta"></div>
+      </section>
+      <section class="box c6">
+        <h2>Sblocca cambi di dispositivo</h2>
+        <p class="sotto">Ogni account può cambiare dispositivo al massimo 3 volte in 30 giorni. Se un cliente vero resta bloccato, azzera qui i suoi cambi.</p>
+        <label for="sblocca-email">Email del cliente</label>
+        <input type="email" id="sblocca-email" class="campo" placeholder="nome@email.it">
+        <div class="fila"><button type="button" id="sblocca">Sblocca</button></div>
+        <div class="esito" id="esito-sblocca"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://futmago-licenza.futmago-api.workers.dev';
+  var ERRORI = {
+    'chiave-sbagliata': 'La chiave non è giusta.',
+    'troppi-tentativi': 'Troppe chiavi sbagliate da questa rete: riprova fra un’ora.',
+    'regali-non-configurati': 'Sul server non c’è la chiave admin.',
+    'non-configurato': 'Sul server non c’è la chiave admin.',
+    'email-non-valida': 'L’email non è valida.',
+    'email-non-valide': 'Controlla le due email: devono essere valide e diverse.',
+    'nessun-premium-su-questa-email': 'Su quell’email non c’è un Premium attivo da spostare.',
+    'non-trovato': 'Il server non conosce ancora il cruscotto: va pubblicato il server aggiornato.'
+  };
+  var NOMI_FUNZIONI = { 'sbc': 'SBC', 'snipe': 'SNIPE', 'album': 'Album', 'automago': 'AUTOMAGO', 'soluzioni-multiple': 'Soluzioni multiple', 'completa-tutte': 'Completa tutte', 'pacchetti': 'Pacchetti' };
+  var NOMI_PIANI = { mensile: 'Mensile', stagione: 'Stagione', regalo: 'Regalo', free: 'Free', mini: 'Mini Pass', season: 'Season Pass' };
+  var giorni = 30;
+  var dati = {};
+  var tabelle = {};
+
+  // ── strumenti ──────────────────────────────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+  function el(tag, attr, testo) {
+    var e = document.createElement(tag);
+    if (attr) for (var k in attr) e.setAttribute(k, attr[k]);
+    if (testo !== undefined) e.textContent = testo;
+    return e;
+  }
+  function numero(n) { return Number(n || 0).toLocaleString('it-IT'); }
+  function euro(cent) { return (Number(cent || 0) / 100).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }); }
+  function euroCorto(cent) {
+    var v = Number(cent || 0) / 100;
+    return v >= 1000 ? '€' + (v / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + 'k' : '€' + Math.round(v).toLocaleString('it-IT');
+  }
+  function data(ms) { return ms ? new Date(ms).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; }
+  function giornoCorto(g) { return new Date(g + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }); }
+  function giornoLungo(g) { return new Date(g + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' }); }
+  function mostra(id, ok, testo) { var e = $(id); e.className = 'esito ' + (ok ? 'ok' : 'ko'); e.textContent = testo; }
+  function chiave() { return $('chiave').value.trim(); }
+  function chiama(percorso, corpo) {
+    if (chiave() === '') return Promise.reject(new Error('Scrivi prima la tua chiave in alto.'));
+    return fetch(API + percorso, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-futmago-chiave': chiave() },
+      body: JSON.stringify(corpo)
+    }).then(function (r) { return r.json(); }).then(function (r) {
+      if (r && r.ok) return r;
+      throw new Error(ERRORI[r && r.errore] || ('Errore: ' + ((r && r.errore) || 'sconosciuto')));
+    });
+  }
+  function parte(nome, extra) {
+    var corpo = { parte: nome, giorni: giorni };
+    for (var k in extra || {}) corpo[k] = extra[k];
+    return chiama('/v1/cruscotto', corpo);
+  }
+
+  // ── grafici (SVG fatti a mano: niente librerie da caricare) ─────────────
+  var NS = 'http://www.w3.org/2000/svg';
+  function svg(tag, attr) { var e = document.createElementNS(NS, tag); for (var k in attr) e.setAttribute(k, attr[k]); return e; }
+  function tetto(max) {
+    if (max <= 0) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(max)));
+    var passi = [1, 2, 2.5, 5, 10];
+    for (var i = 0; i < passi.length; i++) if (passi[i] * p * 4 >= max) return passi[i] * p * 4;
+    return Math.ceil(max / p) * p;
+  }
+  /* Una colonna con gli spigoli in alto arrotondati di 4px, appoggiata alla base. */
+  function colonna(x, y, w, h, raggio) {
+    var r = Math.min(raggio, w / 2, h);
+    if (h <= 0) return '';
+    return 'M' + x + ',' + (y + h) + 'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) + 'V' + (y + h) + 'Z';
+  }
+  function legenda(contenitore, serie) {
+    if (serie.length < 2) return;
+    var l = el('div', { class: 'legenda' });
+    serie.forEach(function (s) { var sp = el('span'); var i = el('i'); i.style.background = s.colore; sp.append(i, document.createTextNode(s.nome)); l.append(sp); });
+    contenitore.append(l);
+  }
+  function suggerimento(contenitore) {
+    var t = el('div', { class: 'suggerimento', role: 'status' });
+    contenitore.append(t);
+    return t;
+  }
+  function riempiSuggerimento(t, titolo, righe) {
+    t.innerHTML = '';
+    t.append(el('b', null, titolo));
+    righe.forEach(function (r) {
+      var d = el('div', { class: 'r' });
+      var s = el('span'); if (r.colore) { var i = el('i'); i.style.background = r.colore; s.append(i); }
+      s.append(document.createTextNode(r.nome));
+      d.append(s, el('span', null, r.valore));
+      t.append(d);
+    });
+  }
+  /*
+   * Colonne impilate nel tempo: una per giorno, una fetta per serie, 2px di
+   * stacco fra le fette, griglia leggera, suggerimento al passaggio.
+   */
+  function colonneNelTempo(id, righe, serie, formato) {
+    var c = $(id); c.innerHTML = '';
+    if (righe.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Nessun dato nel periodo.')); return; }
+    legenda(c, serie);
+    var W = Math.max(280, Math.round(c.clientWidth || 720)), H = 220, sx = 44, dx = 8, sopra = 8, sotto = 24;
+    var max = 0;
+    righe.forEach(function (r) { var t = 0; serie.forEach(function (s) { t += r[s.chiave] || 0; }); max = Math.max(max, t); });
+    var top = tetto(max);
+    var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': c.previousElementSibling ? c.previousElementSibling.textContent : '' });
+    for (var g = 0; g <= 4; g++) {
+      var y = sopra + (H - sopra - sotto) * (1 - g / 4);
+      s.append(svg('line', { x1: sx, x2: W - dx, y1: y, y2: y, stroke: 'var(--griglia)', 'stroke-width': 1 }));
+      var t = svg('text', { x: sx - 6, y: y + 4, 'text-anchor': 'end' }); t.textContent = formato(top * g / 4); s.append(t);
+    }
+    var n = righe.length, passo = (W - sx - dx) / n, larg = Math.max(2, Math.min(28, passo * 0.68));
+    var ogni = Math.ceil(n / Math.max(3, Math.floor((W - sx) / 70)));
+    var tip = suggerimento(c);
+    righe.forEach(function (r, i) {
+      var x = sx + passo * i + (passo - larg) / 2, base = H - sotto, alt = H - sopra - sotto;
+      var accumulato = 0;
+      serie.forEach(function (se, k) {
+        var v = r[se.chiave] || 0; if (v <= 0) return;
+        var h = alt * v / top;
+        var y = base - accumulato - h;
+        var ultima = true;
+        for (var j = k + 1; j < serie.length; j++) if ((r[serie[j].chiave] || 0) > 0) ultima = false;
+        var hh = accumulato > 0 ? h - 2 : h;
+        if (hh > 0) s.append(svg('path', { d: ultima ? colonna(x, y, larg, hh, 4) : 'M' + x + ',' + y + 'h' + larg + 'v' + hh + 'h' + (-larg) + 'Z', fill: se.colore }));
+        accumulato += h;
+      });
+      if ((i % ogni === 0 && n - 1 - i >= ogni / 2) || i === n - 1) { var et = svg('text', { x: x + larg / 2, y: H - 6, 'text-anchor': 'middle' }); et.textContent = giornoCorto(r.giorno); s.append(et); }
+      var area = svg('rect', { x: sx + passo * i, y: sopra, width: passo, height: alt, fill: 'transparent' });
+      area.addEventListener('mousemove', function (ev) {
+        var tot = 0; var vv = serie.map(function (se) { tot += r[se.chiave] || 0; return { nome: se.nome, valore: formato(r[se.chiave] || 0), colore: se.colore }; });
+        if (serie.length > 1) vv.push({ nome: 'Totale', valore: formato(tot) });
+        riempiSuggerimento(tip, giornoLungo(r.giorno), vv);
+        var box = c.getBoundingClientRect();
+        tip.style.display = 'block';
+        var lx = ev.clientX - box.left + 12; if (lx + tip.offsetWidth > box.width) lx = ev.clientX - box.left - tip.offsetWidth - 12;
+        tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+      });
+      area.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      s.append(area);
+    });
+    c.append(s);
+    tabelle[id] = { intestazioni: ['Giorno'].concat(serie.map(function (x) { return x.nome; })).concat(serie.length > 1 ? ['Totale'] : []), righe: righe.slice().reverse().map(function (r) { var tot = 0; var cel = serie.map(function (se) { tot += r[se.chiave] || 0; return formato(r[se.chiave] || 0); }); return [giornoLungo(r.giorno)].concat(cel).concat(serie.length > 1 ? [formato(tot)] : []); }) };
+  }
+  /* Barre orizzontali per categorie, impilate se ci sono piu' serie. Etichette dirette. */
+  function barreCategorie(id, voci, serie, formato) {
+    var c = $(id); c.innerHTML = '';
+    voci = voci.filter(function (v) { var t = 0; serie.forEach(function (s) { t += v[s.chiave] || 0; }); return t > 0; });
+    if (voci.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Nessun dato nel periodo.')); tabelle[id] = { intestazioni: [], righe: [] }; return; }
+    legenda(c, serie);
+    var W = Math.max(280, Math.round(c.clientWidth || 520)), riga = 34, sx = Math.min(140, Math.round(W * 0.34)), dx = 64, H = voci.length * riga + 4;
+    var max = 0; voci.forEach(function (v) { var t = 0; serie.forEach(function (s) { t += v[s.chiave] || 0; }); max = Math.max(max, t); });
+    var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img' });
+    var tip = suggerimento(c);
+    voci.forEach(function (v, i) {
+      var y = i * riga + 6, h = riga - 14, x = sx, tot = 0;
+      var nome = svg('text', { x: sx - 8, y: y + h / 2 + 4, 'text-anchor': 'end' }); nome.textContent = v.nome; nome.style.fill = 'var(--testo-2)'; s.append(nome);
+      serie.forEach(function (se, k) {
+        var val = v[se.chiave] || 0; if (val <= 0) return;
+        var w = (W - sx - dx) * val / max;
+        var ww = x > sx ? w - 2 : w;
+        if (ww > 0) s.append(svg('rect', { x: x > sx ? x + 2 : x, y: y, width: ww, height: h, rx: 3, fill: se.colore }));
+        x += w; tot += val;
+      });
+      var et = svg('text', { x: x + 6, y: y + h / 2 + 4 }); et.textContent = formato(tot); et.style.fill = 'var(--testo)'; s.append(et);
+      var area = svg('rect', { x: 0, y: y - 4, width: W, height: riga, fill: 'transparent' });
+      area.addEventListener('mousemove', function (ev) {
+        riempiSuggerimento(tip, v.nome, serie.map(function (se) { return { nome: se.nome, valore: formato(v[se.chiave] || 0), colore: se.colore }; }));
+        var box = c.getBoundingClientRect(); tip.style.display = 'block';
+        var lx = ev.clientX - box.left + 12; if (lx + tip.offsetWidth > box.width) lx = ev.clientX - box.left - tip.offsetWidth - 12;
+        tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+      });
+      area.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      s.append(area);
+    });
+    c.append(s);
+    tabelle[id] = { intestazioni: [''].concat(serie.map(function (x) { return x.nome; })), righe: voci.map(function (v) { return [v.nome].concat(serie.map(function (se) { return formato(v[se.chiave] || 0); })); }) };
+  }
+  function tabella(contenitore, intestazioni, righe, allineaSinistra) {
+    var c = typeof contenitore === 'string' ? $(contenitore) : contenitore;
+    c.innerHTML = '';
+    if (righe.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Niente da mostrare.')); return; }
+    var t = el('table'), th = el('thead'), tr = el('tr');
+    intestazioni.forEach(function (h, i) { tr.append(el('th', allineaSinistra && allineaSinistra.indexOf(i) >= 0 ? { class: 'sinistra' } : null, h)); });
+    th.append(tr); t.append(th);
+    var tb = el('tbody');
+    righe.forEach(function (r) {
+      var riga = el('tr');
+      r.forEach(function (v, i) {
+        var td = el('td', allineaSinistra && allineaSinistra.indexOf(i) >= 0 ? { class: 'sinistra' } : null);
+        if (v instanceof Node) td.append(v); else td.textContent = v;
+        riga.append(td);
+      });
+      tb.append(riga);
+    });
+    t.append(tb); c.append(t);
+  }
+  function statoEtichetta(tipo, testo) {
+    var s = el('span', { class: 'etichetta-stato ' + tipo });
+    s.textContent = (tipo === 'ok' ? '● ' : tipo === 'att' ? '▲ ' : '■ ') + testo;
+    return s;
+  }
+  /* «Vedi tabella»: il grafico diventa la sua tabella, e viceversa. */
+  document.querySelectorAll('.link-tabella').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-tabella'), c = $(id);
+      if (b.getAttribute('data-aperta') === '1') { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; disegna(); return; }
+      var t = tabelle[id]; if (!t) return;
+      b.setAttribute('data-aperta', '1'); b.textContent = 'Vedi grafico';
+      var w = el('div', { class: 'tabella-wrap tabella-alta' }); c.innerHTML = ''; c.append(w);
+      tabella(w, t.intestazioni, t.righe, [0]);
+    });
+  });
+
+  // ── disegno di tutte le viste dai dati caricati ─────────────────────────
+  function disegna() {
+    document.querySelectorAll('.link-tabella').forEach(function (b) { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; });
+    var PREMIUM = { chiave: 'premium', nome: 'Premium', colore: 'var(--s1)' };
+    var FREE = { chiave: 'free', nome: 'Free', colore: 'var(--s2)' };
+
+    if (dati.giorni) {
+      var g = dati.giorni.slice(0, giorni).slice().reverse();
+      colonneNelTempo('g-attivi', g, [PREMIUM, FREE], numero);
+      var oggi = dati.giorni[0];
+      if (oggi) { $('t-oggi').textContent = numero(oggi.totale); $('t-oggi-d').textContent = numero(oggi.premium) + ' Premium · ' + numero(oggi.free) + ' Free'; }
+    }
+    if (dati.conti) {
+      var c = dati.conti;
+      $('t-conti').textContent = numero(c.totale);
+      var paganti = c.mensile + c.stagione;
+      $('t-conti-d').textContent = numero(paganti) + ' paganti · ' + numero(c.regalo) + ' regalati · ' + numero(c.free) + ' Free';
+      barreCategorie('g-piani', [
+        { nome: 'Premium mensile', n: c.mensile }, { nome: 'Premium stagione', n: c.stagione }, { nome: 'Premium regalati', n: c.regalo },
+        { nome: 'Free', n: c.free }, { nome: 'di cui ex Premium', n: c.exPremium }
+      ], [{ chiave: 'n', nome: 'Account', colore: 'var(--s1)' }], numero);
+      var reg = c.registrazioni.slice(-giorni);
+      colonneNelTempo('g-nuovi', reg, [{ chiave: 'nuovi', nome: 'Nuovi account', colore: 'var(--s1)' }], numero);
+      var nuovi7 = c.registrazioni.slice(-7).reduce(function (t, x) { return t + x.nuovi; }, 0);
+      $('f-paganti').textContent = numero(paganti);
+      $('f-paganti-d').textContent = numero(c.mensile) + ' mensile · ' + numero(c.stagione) + ' stagione · ' + (c.totale ? (paganti / c.totale * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 }) : 0) + '% degli account';
+      $('f-visti7').textContent = numero(c.visti7);
+      $('f-visti-d').textContent = numero(c.visti30) + ' negli ultimi 30 giorni · ' + numero(nuovi7) + ' nuovi in 7 giorni';
+      var disp = c.dispositivi;
+      $('f-disp').textContent = numero(disp.telefono + disp.computer + disp.ignoto);
+      $('f-disp-d').textContent = numero(disp.computer) + ' computer · ' + numero(disp.telefono) + ' telefono' + (disp.ignoto ? ' · ' + numero(disp.ignoto) + ' altri' : '');
+      tabella('tab-scadenze', ['Email', 'Piano', 'Scade'], c.inScadenza.map(function (x) { return [x.email, NOMI_PIANI[x.piano] || x.piano, data(x.fino)]; }), [0, 1]);
+      tabella('tab-ultimi', ['Email', 'Piano', 'Creato'], c.ultimi.map(function (x) { return [x.email, NOMI_PIANI[x.piano] || x.piano, data(x.creatoIl)]; }), [0, 1]);
+    }
+    if (dati.uso) {
+      var u = dati.uso.slice(0, giorni);
+      var perF = {}, limiti = {}, alLimite = 0, qualcosa = false;
+      u.forEach(function (d) {
+        for (var f in d.funzioni) { perF[f] = perF[f] || { p: 0, f: 0 }; perF[f].p += d.funzioni[f].p; perF[f].f += d.funzioni[f].f; qualcosa = true; }
+        for (var l in d.limiti) limiti[l] = (limiti[l] || 0) + d.limiti[l];
+        alLimite += d.personeAlLimite;
+      });
+      $('avviso-uso').hidden = qualcosa && u.filter(function (d) { return d.persone > 0; }).length >= Math.min(giorni, 7);
+      var voci = Object.keys(perF).map(function (f) { return { nome: NOMI_FUNZIONI[f] || f, p: perF[f].p, f: perF[f].f }; }).sort(function (a, b) { return (b.p + b.f) - (a.p + a.f); });
+      barreCategorie('g-funzioni', voci, [{ chiave: 'p', nome: 'Premium', colore: 'var(--s1)' }, { chiave: 'f', nome: 'Free', colore: 'var(--s2)' }], numero);
+      barreCategorie('g-limiti', Object.keys(limiti).map(function (f) { return { nome: NOMI_FUNZIONI[f] || f, n: limiti[f] }; }).sort(function (a, b) { return b.n - a.n; }),
+        [{ chiave: 'n', nome: 'Limiti toccati', colore: 'var(--s2)' }], numero);
+      colonneNelTempo('g-uso-giorni', u.slice().reverse().map(function (d) {
+        var p = 0, f = 0; for (var k in d.funzioni) { p += d.funzioni[k].p; f += d.funzioni[k].f; }
+        return { giorno: d.giorno, premium: p, free: f };
+      }), [PREMIUM, FREE], numero);
+      var totLim = 0; for (var kk in limiti) totLim += limiti[kk];
+      $('f-limite').textContent = numero(alLimite);
+      $('f-limite-d').textContent = numero(totLim) + ' richieste fermate dal limite (somma dei giorni)';
+    }
+    if (dati.elite) {
+      var e = dati.elite, att = e.attivi.mensile + e.attivi.mini + e.attivi.season;
+      $('t-elite').textContent = numero(att);
+      $('t-elite-d').textContent = numero(e.attivi.mensile) + ' mensile · ' + numero(e.attivi.mini) + ' mini · ' + numero(e.attivi.season) + ' season';
+      $('e-attivi').textContent = numero(att);
+      $('e-attivi-d').textContent = numero(e.collegati) + ' con Telegram collegato';
+      $('e-disdetti').textContent = numero(e.disdetti);
+      $('e-noncoll').textContent = numero(e.nonCollegati);
+      $('e-paypal').textContent = numero(e.paypal.aperti);
+      $('e-paypal-d').textContent = 'ancora dentro, su ' + numero(e.paypal.totale) + ' in lista';
+      barreCategorie('g-elite-piani', [{ nome: 'Mensile', n: e.attivi.mensile }, { nome: 'Mini Pass', n: e.attivi.mini }, { nome: 'Season Pass', n: e.attivi.season }], [{ chiave: 'n', nome: 'Abbonati', colore: 'var(--s3)' }], numero);
+      barreCategorie('g-paypal', e.paypal.perScadenza.map(function (x) { return { nome: new Date(x.giorno + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }), n: x.n }; }), [{ chiave: 'n', nome: 'Iscritti PayPal', colore: 'var(--s4)' }], numero);
+      tabella('tab-elite-scadenze', ['Email', 'Telegram', 'Piano', 'Scade', 'Stato'], e.inScadenza.map(function (x) {
+        return [x.email, x.tgUser ? '@' + x.tgUser : '—', NOMI_PIANI[x.piano] || x.piano, data(x.fino), x.stato === 'disdetto' ? statoEtichetta('att', 'Disdetto') : statoEtichetta('ok', 'Si rinnova')];
+      }), [0, 1, 2]);
+      disegnaElenco();
+    }
+    if (dati.incassi) {
+      var inc = dati.incassi;
+      if (!inc.disponibile) {
+        $('avviso-incassi').hidden = false;
+        $('avviso-incassi-testo').innerHTML = inc.motivo === 'manca-chiave'
+          ? '<strong>Gli incassi non sono ancora collegati.</strong> Serve una chiave Stripe in sola lettura sul server (STRIPE_LETTURA): quando c’è, qui compaiono anche i pagamenti passati.'
+          : '<strong>Stripe non ha risposto</strong> (' + inc.motivo + '). Controlla che la chiave abbia il permesso di lettura sugli addebiti.';
+        ['t-incassi', 'i-totale', 'i-futmago', 'i-elite', 'i-rimborsi'].forEach(function (id) { $(id).textContent = '—'; });
+        $('t-incassi-d').textContent = 'Stripe non collegato';
+        ['g-incassi', 'g-incassi-mini'].forEach(function (id) { $(id).innerHTML = ''; $(id).append(el('div', { class: 'vuoto' }, 'Stripe non collegato.')); });
+        tabella('tab-pagamenti', [], []);
+      } else {
+        $('avviso-incassi').hidden = true;
+        var serieInc = [{ chiave: 'futmago', nome: 'FUTMAGO', colore: 'var(--s1)' }, { chiave: 'elite', nome: 'Elite', colore: 'var(--s2)' }, { chiave: 'altro', nome: 'Altro', colore: 'var(--s3)' }];
+        var conAltro = inc.totali.altro !== 0 ? serieInc : serieInc.slice(0, 2);
+        var pg = inc.perGiorno.slice(-giorni);
+        colonneNelTempo('g-incassi', pg, conAltro, euroCorto);
+        colonneNelTempo('g-incassi-mini', pg, conAltro, euroCorto);
+        tabelle['g-incassi'].righe = pg.slice().reverse().map(function (r) { return [giornoLungo(r.giorno)].concat(conAltro.map(function (s) { return euro(r[s.chiave]); })).concat([euro(conAltro.reduce(function (t, s) { return t + r[s.chiave]; }, 0))]); });
+        tabelle['g-incassi-mini'] = tabelle['g-incassi'];
+        var tot = 0, fut = 0, eli = 0;
+        pg.forEach(function (r) { fut += r.futmago; eli += r.elite; tot += r.futmago + r.elite + r.altro; });
+        $('i-totale').textContent = euro(tot); $('i-totale-d').textContent = numero(inc.totali.pagamenti) + ' pagamenti in ' + giorni + ' giorni';
+        $('i-futmago').textContent = euro(fut); $('i-elite').textContent = euro(eli); $('i-rimborsi').textContent = euro(inc.totali.rimborsi);
+        var mese = new Date().toISOString().slice(0, 7), delMese = 0, mf = 0, me = 0;
+        inc.perGiorno.forEach(function (r) { if (r.giorno.slice(0, 7) === mese) { delMese += r.futmago + r.elite + r.altro; mf += r.futmago; me += r.elite; } });
+        $('t-incassi').textContent = euro(delMese);
+        $('t-incassi-d').textContent = 'FUTMAGO ' + euro(mf) + ' · Elite ' + euro(me);
+        tabella('tab-pagamenti', ['Quando', 'Servizio', 'Email', 'Importo', 'Rimborsato'], inc.ultimi.map(function (p) {
+          return [new Date(p.quando).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), p.servizio === 'futmago' ? 'FUTMAGO' : p.servizio === 'elite' ? 'Elite' : 'Altro', p.email || '—', euro(p.importo), p.rimborsato ? euro(p.rimborsato) : '—'];
+        }), [0, 1, 2]);
+      }
+    }
+  }
+  function disegnaElenco() {
+    if (!dati.elite) return;
+    var q = $('filtro-elite').value.trim().toLowerCase().replace(/^@/, '');
+    var ora = Date.now();
+    var righe = dati.elite.iscritti.filter(function (x) { return q === '' || x.email.toLowerCase().indexOf(q) >= 0 || (x.tgUser || '').toLowerCase().indexOf(q) >= 0; }).map(function (x) {
+      var vivo = x.fino > ora;
+      var st = !vivo ? statoEtichetta('ko', 'Scaduto') : x.stato === 'disdetto' ? statoEtichetta('att', 'Disdetto') : statoEtichetta('ok', 'Attivo');
+      return [x.email, x.tgUser ? '@' + x.tgUser : '—', NOMI_PIANI[x.piano] || x.piano, data(x.fino), x.collegato ? 'Sì' : statoEtichetta('att', 'No'), st];
+    });
+    tabella('tab-elite', ['Email', 'Telegram', 'Piano', 'Scadenza', 'Telegram collegato', 'Stato'], righe, [0, 1, 2]);
+  }
+  $('filtro-elite').addEventListener('input', disegnaElenco);
+  /* I grafici si disegnano alla larghezza vera del riquadro: al cambio di misura si ridisegnano. */
+  var attesaMisura = 0, ultimaLarghezza = window.innerWidth;
+  window.addEventListener('resize', function () {
+    if (window.innerWidth === ultimaLarghezza) return;
+    ultimaLarghezza = window.innerWidth;
+    clearTimeout(attesaMisura); attesaMisura = setTimeout(disegna, 150);
+  });
+
+  // ── caricamento ─────────────────────────────────────────────────────────
+  function aggiornaTutto() {
+    if (chiave() === '') { $('stato-generale').textContent = 'Scrivi prima la tua chiave in alto.'; return; }
+    var b = $('aggiorna'); b.disabled = true;
+    $('stato-generale').textContent = 'Carico i dati…';
+    var parti = [
+      ['giorni', function (r) { dati.giorni = r.giorni; }],
+      ['uso', function (r) { dati.uso = r.uso; }],
+      ['elite', function (r) { dati.elite = r.elite; }],
+      ['incassi', function (r) { dati.incassi = r.incassi; }],
+      ['conti', function (r) { dati.conti = r.conti; }]
+    ];
+    var errori = [], fatte = 0;
+    var giorniChiesti = giorni;
+    parti.forEach(function (p) {
+      parte(p[0], { giorni: p[0] === 'giorni' || p[0] === 'uso' || p[0] === 'incassi' ? Math.max(giorniChiesti, 31) : giorniChiesti }).then(function (r) { p[1](r); disegna(); })
+        .catch(function (e) { errori.push(p[0] + ': ' + e.message); })
+        .then(function () {
+          fatte++;
+          if (fatte === parti.length) {
+            b.disabled = false;
+            $('stato-generale').textContent = errori.length
+              ? 'Aggiornato con problemi — ' + errori.join(' · ')
+              : 'Aggiornato alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) + '.';
+          }
+        });
+    });
+  }
+  $('aggiorna').addEventListener('click', aggiornaTutto);
+  document.querySelectorAll('.segmenti button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.segmenti button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      var prima = giorni; giorni = Number(b.getAttribute('data-giorni'));
+      if (giorni > 31 && prima <= 31 && dati.giorni) aggiornaTutto(); else disegna();
+    });
+  });
+  document.querySelectorAll('nav.schede button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('nav.schede button').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('.vista').forEach(function (v) { v.classList.toggle('attiva', v.id === 'vista-' + b.getAttribute('data-vista')); });
+      /* Una vista nascosta non ha larghezza: si ridisegna quando diventa visibile. */
+      disegna();
+    });
+  });
+
+  // ── la scheda di un utente ──────────────────────────────────────────────
+  $('cerca').addEventListener('click', function () {
+    var email = $('cerca-email').value.trim();
+    $('scheda').innerHTML = '';
+    parte('utente', { email: email }).then(function (r) {
+      var u = r.utente;
+      if (!u.trovato) { mostra('esito-cerca', false, 'Nessun account e nessun abbonamento Elite con questa email.'); return; }
+      $('esito-cerca').className = 'esito';
+      var dl = el('dl');
+      function voce(n, v) { dl.append(el('dt', null, n)); var dd = el('dd'); if (v instanceof Node) dd.append(v); else dd.textContent = v; dl.append(dd); }
+      voce('Email', u.email);
+      if (u.futmago) {
+        var f = u.futmago;
+        voce('FUTMAGO', (NOMI_PIANI[f.piano] || f.piano) + (f.fino ? ' · fino al ' + data(f.fino) : ''));
+        voce('Rinnovo', f.rinnovo === 'automatico' ? 'Automatico' : f.rinnovo === 'nessuno' ? 'Nessuno' : (f.rinnovo || '—'));
+        voce('Account creato', data(f.creatoIl));
+        voce('Dispositivi', f.dispositivi.length ? f.dispositivi.map(function (d) { return (d.nome || d.tipo) + ' (visto ' + data(d.vistoIl) + ')'; }).join(' · ') : 'Nessuno');
+        var oggi = []; for (var k in f.oggi.usi) oggi.push((NOMI_FUNZIONI[k] || k) + ' ' + f.oggi.usi[k]);
+        voce('Usi di oggi', oggi.length ? oggi.join(' · ') : 'Nessuno');
+        var lim = []; for (var l in f.oggi.limiti) lim.push((NOMI_FUNZIONI[l] || l) + ' ' + f.oggi.limiti[l]);
+        if (lim.length) voce('Limiti toccati oggi', lim.join(' · '));
+      } else voce('FUTMAGO', 'Nessun account');
+      if (u.elite) {
+        var e = u.elite;
+        voce('Elite', (NOMI_PIANI[e.piano] || e.piano) + ' · fino al ' + data(e.fino) + ' · ' + e.stato + (e.tolto ? ' (tolto da canale e gruppo)' : ''));
+        voce('Telegram', e.collegato ? (e.tgUser ? '@' + e.tgUser : 'Collegato') : 'Non collegato');
+      } else voce('Elite', 'Nessun abbonamento dal sito');
+      $('scheda').append(dl);
+      ['regalo-email', 'sblocca-email'].forEach(function (id) { $(id).value = u.email; });
+    }).catch(function (e) { mostra('esito-cerca', false, e.message); });
+  });
+
+  // ── le azioni dell'assistenza (identiche alla pagina Assistenza) ─────────
+  $('sblocca').addEventListener('click', function () {
+    chiama('/v1/sblocca-cambi', { email: $('sblocca-email').value.trim() })
+      .then(function (r) { mostra('esito-sblocca', true, 'Fatto: ' + r.email + ' può di nuovo cambiare dispositivo.'); })
+      .catch(function (e) { mostra('esito-sblocca', false, e.message); });
+  });
+  $('regala').addEventListener('click', function () {
+    var email = $('regalo-email').value.trim(), scelta = $('regalo-durata').value;
+    var g = scelta === 'fino-2027-09-15' ? (new Date('2027-09-15T23:59:59+02:00').getTime() - Date.now()) / 86400000 : Number(scelta);
+    chiama('/v1/regalo', g > 0 ? { email: email, giorni: g } : { email: email })
+      .then(function (r) { mostra('esito-regalo', true, r.perSempre ? 'Fatto: ' + r.email + ' è Premium per sempre.' : 'Fatto: ' + r.email + ' è Premium fino al ' + data(r.fino) + '.'); })
+      .catch(function (e) { mostra('esito-regalo', false, e.message); });
+  });
+  $('togli').addEventListener('click', function () {
+    var email = $('regalo-email').value.trim();
+    if (!confirm('Togliere il Premium a ' + email + '?')) return;
+    chiama('/v1/regalo', { email: email, togli: true })
+      .then(function (r) { mostra('esito-regalo', true, 'Fatto: ' + r.email + ' non è più Premium.'); })
+      .catch(function (e) { mostra('esito-regalo', false, e.message); });
+  });
+  $('sposta').addEventListener('click', function () {
+    chiama('/v1/sposta', { da: $('da').value.trim(), a: $('a').value.trim() })
+      .then(function (r) { mostra('esito-sposta', true, 'Fatto: il Premium è passato da ' + r.da + ' a ' + r.a + ' (fino al ' + data(r.fino) + '). ' + r.da + ' ora è gratuito.'); })
+      .catch(function (e) { mostra('esito-sposta', false, e.message); });
+  });
+  $('giro').addEventListener('click', function () {
+    if (!confirm('Fare adesso il giro delle scadenze Elite? Chi è scaduto viene tolto da canale e gruppo.')) return;
+    chiama('/elite/giro', {})
+      .then(function (r) { mostra('esito-giro', true, 'Fatto: ' + (r.tolti && r.tolti.length ? 'tolti ' + r.tolti.length + ' (' + r.tolti.join(', ') + ')' : 'nessuno da togliere') + '.'); })
+      .catch(function (e) { mostra('esito-giro', false, e.message); });
+  });
+})();
+</script>
+</body>
+</html>
