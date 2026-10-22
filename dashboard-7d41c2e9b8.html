@@ -222,8 +222,8 @@
         <div class="grafico" id="g-funzioni"></div>
       </section>
       <section style="--i:7" class="box c6">
-        <div class="riga-titolo"><h2>Limiti toccati dai Free</h2><button class="link-tabella" data-tabella="g-limiti">Vedi tabella</button></div>
-        <p class="sotto">Volte in cui un Free ha voluto usare una funzione e il limite giornaliero ha detto no: lì il Premium serve davvero.</p>
+        <div class="riga-titolo"><h2>Free arrivati al limite</h2><button class="link-tabella" data-tabella="g-limiti">Vedi tabella</button></div>
+        <p class="sotto">Free che in un giorno hanno usato tutto quello che il piano gratuito concede (10 SBC, 3 squadre dell'Album, 1 AUTOMAGO): lì il Premium serve davvero. Persone per giorno, sommate nel periodo.</p>
         <div class="grafico" id="g-limiti"></div>
       </section>
       <section style="--i:8" class="box c12">
@@ -712,14 +712,14 @@
       var voci = Object.keys(perF).map(function (f) { return { nome: NOMI_FUNZIONI[f] || f, p: perF[f].p, f: perF[f].f }; }).sort(function (a, b) { return (b.p + b.f) - (a.p + a.f); });
       barreCategorie('g-funzioni', voci, [{ chiave: 'p', nome: 'Premium', colore: 'var(--s1)' }, { chiave: 'f', nome: 'Free', colore: 'var(--s2)' }], numero);
       barreCategorie('g-limiti', Object.keys(limiti).map(function (f) { return { nome: NOMI_FUNZIONI[f] || f, n: limiti[f] }; }).sort(function (a, b) { return b.n - a.n; }),
-        [{ chiave: 'n', nome: 'Limiti toccati', colore: 'var(--s2)' }], numero);
+        [{ chiave: 'n', nome: 'Free al limite', colore: 'var(--s2)' }], numero);
       colonneNelTempo('g-uso-giorni', u.slice().reverse().map(function (d) {
         var p = 0, f = 0; for (var k in d.funzioni) { p += d.funzioni[k].p; f += d.funzioni[k].f; }
         return { giorno: d.giorno, premium: p, free: f };
       }), [PREMIUM, FREE], numero);
       var totLim = 0; for (var kk in limiti) totLim += limiti[kk];
       mostraNumero('f-limite', alLimite, numeroIntero); scintilla('f-limite', u.slice(0, 14).map(function (d) { return d.personeAlLimite; }).reverse());
-      $('f-limite-d').textContent = numero(totLim) + ' richieste fermate dal limite (somma dei giorni)';
+      $('f-limite-d').textContent = numero(totLim) + ' volte un Free arrivato al limite (somma dei giorni)';
     }
     if (dati.elite) {
       var e = dati.elite, att = e.attivi.mensile + e.attivi.mini + e.attivi.season;
