@@ -231,12 +231,22 @@
         <p class="sotto">Tutte le funzioni sommate, per giorno.</p>
         <div class="grafico" id="g-uso-giorni"></div>
       </section>
-      <section style="--i:9" class="box c6">
+      <section style="--i:9" class="box c12">
+        <div class="riga-titolo"><h2>Disdette</h2><span class="sotto" style="margin:0" id="f-disdette-n"></span></div>
+        <p class="sotto">Mensili disdetti su Stripe: «ancora acceso» esce alla scadenza, «finito» è già tornato Free.</p>
+        <div class="griglia" style="gap:12px">
+          <div class="c4 tessera box" style="--i:0"><div class="etichetta">Disdetti, ancora accesi</div><div class="numero" id="f-disdetti">—</div><div class="dettaglio" id="f-disdetti-d">&nbsp;</div></div>
+          <div class="c4 tessera box" style="--i:0"><div class="etichetta">Disdetti, già finiti</div><div class="numero" id="f-disdetti-finiti">—</div><div class="dettaglio">Tornati Free</div></div>
+          <div class="c4 tessera box" style="--i:0"><div class="etichetta">Disdette sui mensili</div><div class="numero" id="f-disdetti-perc">—</div><div class="dettaglio">Accesi disdetti / mensili accesi</div></div>
+        </div>
+        <div class="tabella-wrap tabella-alta" id="tab-disdette" style="margin-top:14px"></div>
+      </section>
+      <section style="--i:10" class="box c6">
         <h2>Premium in scadenza</h2>
         <p class="sotto">Pass di stagione e regali che finiscono nei prossimi 14 giorni (i mensili si rinnovano da soli).</p>
         <div class="tabella-wrap tabella-alta" id="tab-scadenze"></div>
       </section>
-      <section style="--i:10" class="box c6">
+      <section style="--i:11" class="box c6">
         <h2>Ultimi account creati</h2>
         <p class="sotto">I 20 più recenti, col piano di adesso.</p>
         <div class="tabella-wrap tabella-alta" id="tab-ultimi"></div>
@@ -672,13 +682,22 @@
       colonneNelTempo('g-nuovi', reg, [{ chiave: 'nuovi', nome: 'Nuovi account', colore: 'var(--s1)' }], numero);
       var nuovi7 = c.registrazioni.slice(-7).reduce(function (t, x) { return t + x.nuovi; }, 0);
       mostraNumero('f-paganti', paganti, numeroIntero);
-      $('f-paganti-d').textContent = numero(c.mensile) + ' mensile · ' + numero(c.stagione) + ' stagione · ' + (c.totale ? (paganti / c.totale * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 }) : 0) + '% degli account';
+      $('f-paganti-d').textContent = numero(c.mensile) + ' mensile · ' + numero(c.stagione) + ' stagione · ' + (typeof c.disdetti === 'number' ? numero(c.disdetti) + ' disdetti · ' : '') + (c.totale ? (paganti / c.totale * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 }) : 0) + '% degli account';
       mostraNumero('f-visti7', c.visti7, numeroIntero);
       $('f-visti-d').textContent = numero(c.visti30) + ' negli ultimi 30 giorni · ' + numero(nuovi7) + ' nuovi in 7 giorni';
       var disp = c.dispositivi;
       mostraNumero('f-disp', disp.telefono + disp.computer + disp.ignoto, numeroIntero);
       $('f-disp-d').textContent = numero(disp.computer) + ' computer · ' + numero(disp.telefono) + ' telefono' + (disp.ignoto ? ' · ' + numero(disp.ignoto) + ' altri' : '');
       tabella('tab-scadenze', ['Email', 'Piano', 'Scade'], c.inScadenza.map(function (x) { return [x.email, NOMI_PIANI[x.piano] || x.piano, data(x.fino)]; }), [0, 1]);
+      if (typeof c.disdetti === 'number') {
+        mostraNumero('f-disdetti', c.disdetti, numeroIntero);
+        mostraNumero('f-disdetti-finiti', c.disdettiFiniti, numeroIntero);
+        $('f-disdetti-perc').textContent = c.mensile ? (c.disdetti / c.mensile * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + '%' : '0%';
+        var prossima = c.disdette.filter(function (x) { return !x.finito; })[0];
+        $('f-disdetti-d').textContent = prossima ? 'Il primo esce il ' + data(prossima.fino) : 'Nessuno in uscita';
+        $('f-disdette-n').textContent = numero(c.disdetti + c.disdettiFiniti) + ' in tutto';
+        tabella('tab-disdette', ['Email', 'Stato', 'Fine'], c.disdette.map(function (x) { return [x.email, x.finito ? 'finito' : 'ancora acceso', data(x.fino)]; }), [0, 1]);
+      }
       tabella('tab-ultimi', ['Email', 'Piano', 'Creato'], c.ultimi.map(function (x) { return [x.email, NOMI_PIANI[x.piano] || x.piano, data(x.creatoIl)]; }), [0, 1]);
     }
     if (dati.uso) {
@@ -777,22 +796,23 @@
   // ── Elite su PayPal: numeri fissi dai file dei movimenti ────────────────
   /*
    * Contati il 21/10/2026 dai due file «Report attivita'» di PayPal (tutte le
-   * transazioni, 01/09–21/10/2026). Elite riconosciuto dal titolo del
+   * transazioni, 25/08–21/10/2026). Elite riconosciuto dal titolo del
    * pagamento; il 59,99 «da cellulare» del 04/09 e' un Season Pass (confermato
    * dal titolare). Esclusi prelievi, conversioni e pagamenti di altri servizi.
    * Per aggiornarli: un file nuovo da PayPal e si rifanno i conti.
    */
   var PAYPAL_ELITE = {
-    aggiornato: '21/10/2026', periodo: '1 settembre – 21 ottobre 2026',
-    pagamenti: 334, lordo: 603666, tariffe: 24729, rimborsi: 23092, nRimborsi: 8,
+    aggiornato: '22/10/2026', periodo: '25 agosto – 21 ottobre 2026',
+    pagamenti: 346, lordo: 659654, tariffe: 26745, rimborsi: 23092, nRimborsi: 8,
     mesi: [
+      { mese: 'Agosto 2026 (25-31)', n: 12, lordo: 55988, netto: 53972 },
       { mese: 'Settembre 2026', n: 221, lordo: 424779, netto: 407678 },
       { mese: 'Ottobre 2026 (1-21)', n: 113, lordo: 178887, netto: 171259 }
     ],
     piani: [
-      { nome: 'Mensile 9,99', n: 250, lordo: 249750 },
-      { nome: 'Season Pass', n: 40, lordo: 227960 },
-      { nome: 'Mini 29,99', n: 32, lordo: 95968 },
+      { nome: 'Mensile 9,99', n: 252, lordo: 251748 },
+      { nome: 'Season Pass', n: 48, lordo: 275952 },
+      { nome: 'Mini 29,99', n: 34, lordo: 101966 },
       { nome: 'Mini 24,99', n: 12, lordo: 29988 }
     ]
   };
