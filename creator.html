@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Area creator FUTMAGO</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Creator">
+<link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/futmago-icona-32.png">
+<!--
+  L'AREA CREATOR (CHIESTO il 22/10/2026, primo affiliato ONLYONELY): ogni
+  creator entra con la sua chiave personale e vede solo i propri numeri,
+  con la stessa grafica della Dashboard del titolare (stile e grafici
+  copiati da li' da tools: crea_pagina_creator.py).
+
+  Il link privato e' /creator#k=CHIAVE: la chiave sta dopo il cancelletto,
+  quindi non arriva mai al server del sito ne' nei suoi registri.
+  Dati   POST /v1/creator/dati { chiave }
+-->
+<style>
+  :root {
+    color-scheme: dark;
+    --fondo: #0b0f15; --scheda: #12161d; --scheda-2: #161b23; --bordo: #2a3442; --griglia: #222b36;
+    --testo: #e8eef5; --testo-2: #b4c0cd; --spento: #8796a8;
+    --verde: #39ff7a;
+    /* Serie dei grafici: tavolozza validata sullo sfondo delle schede (#12161d). */
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --buono: #0ca30c; --attenzione: #fab219; --critico: #d03b3b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--testo); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .pagina { max-width: 1240px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 18px; }
+  header.testa { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: space-between; }
+  h1 { margin: 0; font-size: 1.5rem; letter-spacing: .01em; display: flex; align-items: center; gap: 12px; }
+  h1 .logo { border-radius: 12px; box-shadow: 0 0 0 1px rgba(57,255,122,.35), 0 0 24px rgba(57,255,122,.25); }
+  body { background:
+      radial-gradient(900px 420px at 12% -8%, rgba(57,255,122,.09), transparent 60%),
+      radial-gradient(800px 380px at 100% 0%, rgba(57,135,229,.10), transparent 60%),
+      var(--fondo); background-attachment: fixed; }
+  h1 .v { color: var(--verde); }
+  .comandi { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .comandi form { margin: 0; }
+  input, select { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--bordo); background: #0d1117; color: var(--testo); font: inherit; min-width: 0; }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--verde); outline-offset: 1px; }
+  button { padding: 10px 16px; border-radius: 9px; border: none; font: 800 14px system-ui, sans-serif; cursor: pointer; background: var(--verde); color: #000; }
+  button.piccolo { padding: 6px 12px; font-size: 12px; }
+  button.neutro { background: #1b222c; color: var(--testo); border: 1px solid var(--bordo); font-weight: 700; }
+  button:disabled { opacity: .5; cursor: default; }
+  .segmenti { display: inline-flex; border: 1px solid var(--bordo); border-radius: 9px; overflow: hidden; }
+  .segmenti button { border-radius: 0; background: transparent; color: var(--testo-2); font-weight: 700; padding: 9px 14px; }
+  .segmenti button[aria-pressed="true"] { background: #1f2a37; color: var(--testo); }
+  .stato-generale { color: var(--spento); font-size: .85rem; }
+  nav.schede { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--bordo); }
+  nav.schede button { background: transparent; color: var(--testo-2); border-radius: 9px 9px 0 0; padding: 10px 16px; font-weight: 700; }
+  nav.schede button[aria-selected="true"] { color: var(--testo); box-shadow: inset 0 -2px 0 var(--verde); }
+  .vista { display: none; gap: 18px; }
+  .vista.attiva { display: grid; }
+  .griglia { display: grid; gap: 18px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c6 { grid-column: span 6; } .c4 { grid-column: span 4; } .c3 { grid-column: span 3; }
+  @media (max-width: 980px) { .c8, .c6, .c4 { grid-column: span 12; } .c3 { grid-column: span 6; } }
+  @media (max-width: 560px) { .c3 { grid-column: span 12; } }
+  section.box { background: linear-gradient(180deg, var(--scheda-2), var(--scheda)); border: 1px solid var(--bordo); border-radius: 14px; padding: 16px 18px; min-width: 0;
+    transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease; }
+  section.box:hover { border-color: #3a4757; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+  /* Le schede entrano una dopo l'altra quando si apre una vista. */
+  .vista.attiva section.box { animation: entra .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+  @keyframes entra { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  /* Tessere: barra colorata in alto, mini grafico, confronto con la media. */
+  .tessera { position: relative; overflow: hidden; }
+  .tessera::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--verde), var(--s1)); opacity: .85; }
+  .tessera .riga-num { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+  .tessera .scintilla { width: 96px; height: 34px; flex: 0 0 auto; }
+  .tessera .scintilla path.linea { fill: none; stroke: var(--verde); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: var(--lung, 400); stroke-dashoffset: var(--lung, 400); animation: traccia 1.1s ease-out .25s forwards; }
+  .tessera .scintilla path.area { fill: url(#sfumatura-scintilla); opacity: 0; animation: appare .8s ease-out .7s forwards; }
+  @keyframes traccia { to { stroke-dashoffset: 0; } }
+  @keyframes appare { to { opacity: 1; } }
+  .variazione { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: .78rem; padding: 1px 7px; border-radius: 99px; margin-left: 6px; }
+  .variazione.su { color: #7dffb0; background: rgba(57,255,122,.12); }
+  .variazione.giu { color: #ffb0a0; background: rgba(217,89,38,.16); }
+  /* In attesa dei dati: un velo che scorre al posto del numero. */
+  .numero.attesa { color: transparent; border-radius: 8px; width: 60%; background: linear-gradient(90deg, #1b222c 0%, #26303d 50%, #1b222c 100%); background-size: 200% 100%; animation: scorre 1.2s linear infinite; }
+  @keyframes scorre { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  /* Barre: crescono dalla base (colonne) o da sinistra (barre). */
+  .grafico.anima .cresce-su { transform-box: fill-box; transform-origin: 50% 100%; animation: cresciSu .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--k, 0) * 14ms); }
+  .grafico.anima .cresce-dx { transform-box: fill-box; transform-origin: 0 50%; animation: cresciDx .8s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--k, 0) * 70ms); }
+  .grafico.anima .etichetta-dato { animation: appare .5s ease-out both; animation-delay: calc(var(--k, 0) * 70ms + 450ms); opacity: 0; }
+  @keyframes cresciSu { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes cresciDx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .grafico svg path, .grafico svg rect.barra { transition: opacity .15s ease; }
+  .grafico svg.passaggio g.gruppo path, .grafico svg.passaggio g.gruppo rect.barra { opacity: .4; }
+  .grafico svg.passaggio g.gruppo.acceso path, .grafico svg.passaggio g.gruppo.acceso rect.barra { opacity: 1; }
+  #aggiorna.gira::after { content: ''; display: inline-block; width: 12px; height: 12px; margin-left: 8px; vertical-align: -1px; border: 2px solid rgba(0,0,0,.35); border-top-color: #000; border-radius: 50%; animation: giro .8s linear infinite; }
+  @keyframes giro { to { transform: rotate(360deg); } }
+  .stato-generale .punto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--verde); margin-right: 6px; box-shadow: 0 0 0 0 rgba(57,255,122,.6); animation: pulsa 2s infinite; }
+  @keyframes pulsa { 0% { box-shadow: 0 0 0 0 rgba(57,255,122,.55); } 70% { box-shadow: 0 0 0 9px rgba(57,255,122,0); } 100% { box-shadow: 0 0 0 0 rgba(57,255,122,0); } }
+  /* Chi ha chiesto meno movimento la vede ferma, completa. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001s !important; animation-delay: 0s !important; transition: none !important; }
+    .tessera .scintilla path.linea { stroke-dashoffset: 0; }
+  }
+  section.box h2 { margin: 0; font-size: 1.02rem; }
+  .sotto { color: var(--spento); font-size: .85rem; margin: 2px 0 12px; }
+  .riga-titolo { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+  .link-tabella { background: none; border: none; color: var(--testo-2); padding: 0; font: 600 .82rem system-ui, sans-serif; text-decoration: underline; cursor: pointer; }
+  /* Le tessere dei numeri */
+  .tessera .etichetta { color: var(--testo-2); font-size: .85rem; font-weight: 600; }
+  .tessera .numero { font-size: 2rem; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .tessera .dettaglio { color: var(--spento); font-size: .82rem; margin-top: 2px; }
+  .vuoto { color: var(--spento); font-size: .9rem; padding: 18px 0; }
+  .avviso { border-left: 3px solid var(--attenzione); background: rgba(250,178,25,.07); padding: 10px 12px; border-radius: 6px; color: var(--testo-2); font-size: .88rem; }
+  .avviso strong { color: var(--testo); }
+  /* Grafici */
+  .grafico { position: relative; }
+  .grafico svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .grafico text { fill: var(--spento); font: 11px system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  .legenda { display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 8px; font-size: .82rem; color: var(--testo-2); }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .suggerimento { position: absolute; pointer-events: none; background: #0d1117; border: 1px solid var(--bordo); border-radius: 8px; padding: 8px 10px; font-size: .82rem; color: var(--testo); box-shadow: 0 8px 24px rgba(0,0,0,.45); white-space: nowrap; z-index: 5; display: none; }
+  .suggerimento b { display: block; margin-bottom: 3px; }
+  .suggerimento .r { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+  .suggerimento i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 6px; }
+  /* Tabelle */
+  .tabella-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .88rem; }
+  th, td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--griglia); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--spento); font-weight: 600; font-size: .8rem; position: sticky; top: 0; background: var(--scheda); }
+  td.sinistra, th.sinistra { text-align: left; }
+  .tabella-alta { max-height: 380px; overflow: auto; }
+  .etichetta-stato { display: inline-flex; gap: 5px; align-items: center; font-weight: 700; font-size: .8rem; }
+  .etichetta-stato.ok { color: var(--buono); } .etichetta-stato.att { color: var(--attenzione); } .etichetta-stato.ko { color: #ff8a8a; }
+  /* Moduli e azioni */
+  label { display: block; font-weight: 600; margin: 10px 0 4px; font-size: .9rem; }
+  .campo { width: 100%; }
+  .fila { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .fila > button { flex: 1 1 160px; }
+  .esito { margin-top: 10px; padding: 9px 11px; border-radius: 9px; font-weight: 600; display: none; font-size: .9rem; }
+  .esito.ok { display: block; background: #16301f; border: 1px solid #2b6b41; color: var(--verde); }
+  .esito.ko { display: block; background: #3a1d1d; border: 1px solid #6b2b2b; color: #ff9d9d; }
+  .scheda-utente dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 0; font-size: .9rem; }
+  .scheda-utente dt { color: var(--spento); }
+  .scheda-utente dd { margin: 0; }
+  .nascosto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+<style>
+  .area-link { display: grid; gap: 10px; }
+  .area-link .riga { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .area-link code { flex: 1 1 240px; background: #0d1117; border: 1px solid var(--bordo); border-radius: 8px; padding: 10px 12px; color: var(--testo); font-size: 13px; word-break: break-all; }
+  .area-link .codice { font-weight: 800; color: var(--verde, #39ff7a); letter-spacing: .06em; }
+  .regole li { margin: 6px 0; color: var(--tenue, #9fb0c0); }
+  .regole b { color: var(--testo); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="sfumatura-scintilla" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39ff7a" stop-opacity=".28"/><stop offset="1" stop-color="#39ff7a" stop-opacity="0"/></linearGradient></defs></svg>
+<div class="pagina">
+  <header class="testa">
+    <h1><img class="logo" src="/futmago-icona-180.png" alt="" width="40" height="40"><span>Area creator <span class="v" id="nome-creator">FUTMAGO</span></span></h1>
+    <div class="comandi">
+      <form onsubmit="return false" id="modulo-chiave">
+        <input type="text" name="username" autocomplete="username" value="creator-futmago" style="display:none">
+        <label class="nascosto" for="chiave">La tua chiave</label>
+        <input type="password" id="chiave" name="password" autocomplete="current-password" placeholder="La tua chiave" size="18">
+      </form>
+      <div class="segmenti" role="group" aria-label="Periodo">
+        <button type="button" data-giorni="7" aria-pressed="false">7 giorni</button>
+        <button type="button" data-giorni="30" aria-pressed="true">30 giorni</button>
+        <button type="button" data-giorni="90" aria-pressed="false">90 giorni</button>
+      </div>
+      <button type="button" id="aggiorna">Aggiorna</button>
+    </div>
+  </header>
+  <div class="stato-generale" id="stato-generale">Apri il link privato che ti abbiamo mandato, oppure scrivi la tua chiave e premi «Aggiorna».</div>
+
+  <div class="vista attiva" id="vista-creator">
+    <div class="griglia">
+      <section style="--i:1" class="box tessera c3"><div class="etichetta">Le tue vendite</div><div class="riga-num"><div class="numero attesa" id="t-vendite">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="t-vendite-d">&nbsp;</div></section>
+      <section style="--i:2" class="box tessera c3"><div class="etichetta">Hai guadagnato</div><div class="riga-num"><div class="numero attesa" id="t-maturato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">2 € a Mensile · 5 € a Season Pass</div></section>
+      <section style="--i:3" class="box tessera c3"><div class="etichetta">Già ricevuto</div><div class="riga-num"><div class="numero attesa" id="t-pagato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="t-pagato-d">&nbsp;</div></section>
+      <section style="--i:4" class="box tessera c3"><div class="etichetta">Da ricevere</div><div class="riga-num"><div class="numero attesa" id="t-dapagare">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">Maturato meno già ricevuto</div></section>
+
+      <section style="--i:5" class="box c8">
+        <div class="riga-titolo"><h2>Vendite al giorno</h2><button class="link-tabella" data-tabella="g-giorni">Vedi tabella</button></div>
+        <p class="sotto">Chi ha pagato FUTMAGO Premium con un tuo codice, ora italiana.</p>
+        <div class="grafico" id="g-giorni"></div>
+      </section>
+      <section style="--i:6" class="box c4">
+        <div class="riga-titolo"><h2>Per piano</h2><button class="link-tabella" data-tabella="g-piani">Vedi tabella</button></div>
+        <p class="sotto">Quanto hai guadagnato con ogni piano, in tutto.</p>
+        <div class="grafico" id="g-piani"></div>
+      </section>
+
+      <section style="--i:7" class="box c12">
+        <h2>Le tue vendite</h2>
+        <p class="sotto">Una riga per pagamento. Il cliente si vede solo in parte, per la sua privacy.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-vendite"></div>
+      </section>
+
+      <section style="--i:8" class="box c6 area-link">
+        <h2>I tuoi link e i tuoi codici</h2>
+        <p class="sotto">Condividi il link: apre la pagina Premium con il tuo codice già inserito. Funziona per tutti e due i piani.</p>
+        <div class="riga"><code id="link-1">—</code><button type="button" class="neutro" data-copia="link-1">Copia</button></div>
+        <div class="riga"><span>Codice Mensile</span> <span class="codice" id="cod-mese">—</span> <span class="sotto" style="margin:0">4,99 € il primo mese invece di 5,99</span></div>
+        <div class="riga"><span>Codice Season Pass</span> <span class="codice" id="cod-pass">—</span> <span class="sotto" style="margin:0">34,99 € invece di 39,99</span></div>
+        <div class="esito" id="esito-copia"></div>
+      </section>
+      <section style="--i:9" class="box c6">
+        <h2>Come funziona</h2>
+        <ul class="regole">
+          <li>Guadagni <b>2 €</b> per ogni abbonamento <b>Mensile</b> e <b>5 €</b> per ogni <b>Season Pass</b> pagato con un tuo codice.</li>
+          <li>La commissione vale sulla <b>prima vendita</b> di ogni cliente: i rinnovi mensili non contano.</li>
+          <li>Se un pagamento viene rimborsato, la sua commissione viene tolta.</li>
+          <li>I numeri si aggiornano da soli appena il cliente paga.</li>
+        </ul>
+        <div id="pagamenti-ricevuti"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var API = 'https://futmago-licenza.futmago-api.workers.dev';
+  var MEMORIA = 'fm.chiaveCreator';
+  var ERRORI = {
+    'chiave-sbagliata': 'La chiave non è giusta.',
+    'troppi-tentativi': 'Troppe chiavi sbagliate da questa rete: riprova fra un’ora.'
+  };
+  var NOMI_PIANO = { mese: 'Mensile', pass: 'Season Pass' };
+  var giorni = 30;
+  var dati = {};
+  var tabelle = {};
+
+  // ── strumenti ──────────────────────────────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+  function el(tag, attr, testo) {
+    var e = document.createElement(tag);
+    if (attr) for (var k in attr) e.setAttribute(k, attr[k]);
+    if (testo !== undefined) e.textContent = testo;
+    return e;
+  }
+  function numero(n) { return Number(n || 0).toLocaleString('it-IT'); }
+  function euro(cent) { return (Number(cent || 0) / 100).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' }); }
+  function euroCorto(cent) {
+    var v = Number(cent || 0) / 100;
+    return v >= 1000 ? '€' + (v / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + 'k' : '€' + Math.round(v).toLocaleString('it-IT');
+  }
+  function data(ms) { return ms ? new Date(ms).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; }
+  function giornoCorto(g) { return new Date(g + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }); }
+  function giornoLungo(g) { return new Date(g + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' }); }
+  function mostra(id, ok, testo) { var e = $(id); e.className = 'esito ' + (ok ? 'ok' : 'ko'); e.textContent = testo; }
+  function chiave() { return $('chiave').value.trim(); }
+  function chiama(percorso, corpo) {
+    if (chiave() === '') return Promise.reject(new Error('Scrivi prima la tua chiave in alto.'));
+    return fetch(API + percorso, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-futmago-chiave': chiave() },
+      body: JSON.stringify(corpo)
+    }).then(function (r) { return r.json(); }).then(function (r) {
+      if (r && r.ok) return r;
+      throw new Error(ERRORI[r && r.errore] || ('Errore: ' + ((r && r.errore) || 'sconosciuto')));
+    });
+  }
+  function parte(nome, extra) {
+    var corpo = { parte: nome, giorni: giorni };
+    for (var k in extra || {}) corpo[k] = extra[k];
+    return chiama('/v1/cruscotto', corpo);
+  }
+
+  // ── i numeri che salgono, i mini grafici, il confronto con la media ────
+  var animaProssimo = true;
+  var fermo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ultimi = {};
+  /* Il numero sale dal valore di prima a quello nuovo; il testo finale e' sempre quello esatto. */
+  function mostraNumero(id, valore, formato) {
+    var e = $(id); if (!e) return;
+    e.classList.remove('attesa');
+    var da = ultimi[id] || 0, a = Number(valore) || 0;
+    ultimi[id] = a;
+    if (fermo || da === a) { e.textContent = formato(a); return; }
+    var inizio = null, durata = 900;
+    function passo(t) {
+      if (inizio === null) inizio = t;
+      var p = Math.min(1, (t - inizio) / durata), q = 1 - Math.pow(1 - p, 3);
+      e.textContent = formato(da + (a - da) * q);
+      if (p < 1) requestAnimationFrame(passo); else e.textContent = formato(a);
+    }
+    requestAnimationFrame(passo);
+  }
+  function numeroIntero(n) { return numero(Math.round(n)); }
+  function euroIntero(n) { return euro(Math.round(n)); }
+  /* Mini grafico degli ultimi giorni nella tessera, dal piu' vecchio al piu' recente. */
+  function scintilla(idNumero, valori) {
+    var e = $(idNumero); if (!e) return;
+    var dove = e.parentNode.querySelector('svg.scintilla'); if (!dove) return;
+    dove.innerHTML = '';
+    if (!valori || valori.length < 2 || valori.every(function (v) { return v === 0; })) { dove.style.display = 'none'; return; }
+    dove.style.display = '';
+    var W = 96, H = 34, max = Math.max.apply(null, valori), min = Math.min.apply(null, valori), campo = max - min || 1;
+    var punti = valori.map(function (v, i) { return [i * (W - 4) / (valori.length - 1) + 2, H - 3 - (v - min) / campo * (H - 8)]; });
+    var d = punti.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join('');
+    dove.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    dove.append(svg('path', { class: 'area', d: d + 'L' + (W - 2) + ',' + H + 'L2,' + H + 'Z' }));
+    var linea = svg('path', { class: 'linea', d: d });
+    dove.append(linea);
+    try { linea.style.setProperty('--lung', Math.ceil(linea.getTotalLength())); } catch (x) { /* senza misura la linea resta intera */ }
+    var ult = punti[punti.length - 1];
+    dove.append(svg('circle', { cx: ult[0], cy: ult[1], r: 2.6, fill: 'var(--verde)' }));
+  }
+  /* Il confronto di oggi con la media dei 7 giorni prima, accanto al dettaglio. */
+  function confronto(idDettaglio, oggi, precedenti) {
+    var e = $(idDettaglio); if (!e || precedenti.length === 0) return;
+    var media = precedenti.reduce(function (t, v) { return t + v; }, 0) / precedenti.length;
+    if (media <= 0) return;
+    var diff = (oggi - media) / media * 100;
+    var b = el('span', { class: 'variazione ' + (diff >= 0 ? 'su' : 'giu'), title: 'Rispetto alla media dei 7 giorni prima (' + numero(Math.round(media)) + ')' });
+    b.textContent = (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff).toLocaleString('it-IT', { maximumFractionDigits: 0 }) + '% vs media';
+    e.append(b);
+  }
+
+  // ── grafici (SVG fatti a mano: niente librerie da caricare) ─────────────
+  var NS = 'http://www.w3.org/2000/svg';
+  function svg(tag, attr) { var e = document.createElementNS(NS, tag); for (var k in attr) e.setAttribute(k, attr[k]); return e; }
+  function tetto(max) {
+    if (max <= 0) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(max)));
+    var passi = [1, 2, 2.5, 5, 10];
+    for (var i = 0; i < passi.length; i++) if (passi[i] * p * 4 >= max) return passi[i] * p * 4;
+    return Math.ceil(max / p) * p;
+  }
+  /* Una colonna con gli spigoli in alto arrotondati di 4px, appoggiata alla base. */
+  function colonna(x, y, w, h, raggio) {
+    var r = Math.min(raggio, w / 2, h);
+    if (h <= 0) return '';
+    return 'M' + x + ',' + (y + h) + 'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) + 'V' + (y + h) + 'Z';
+  }
+  function legenda(contenitore, serie) {
+    if (serie.length < 2) return;
+    var l = el('div', { class: 'legenda' });
+    serie.forEach(function (s) { var sp = el('span'); var i = el('i'); i.style.background = s.colore; sp.append(i, document.createTextNode(s.nome)); l.append(sp); });
+    contenitore.append(l);
+  }
+  function suggerimento(contenitore) {
+    var t = el('div', { class: 'suggerimento', role: 'status' });
+    contenitore.append(t);
+    return t;
+  }
+  function riempiSuggerimento(t, titolo, righe) {
+    t.innerHTML = '';
+    t.append(el('b', null, titolo));
+    righe.forEach(function (r) {
+      var d = el('div', { class: 'r' });
+      var s = el('span'); if (r.colore) { var i = el('i'); i.style.background = r.colore; s.append(i); }
+      s.append(document.createTextNode(r.nome));
+      d.append(s, el('span', null, r.valore));
+      t.append(d);
+    });
+  }
+  /*
+   * Colonne impilate nel tempo: una per giorno, una fetta per serie, 2px di
+   * stacco fra le fette, griglia leggera, suggerimento al passaggio.
+   */
+  function colonneNelTempo(id, righe, serie, formato) {
+    var c = $(id); c.innerHTML = '';
+    if (righe.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Nessun dato nel periodo.')); return; }
+    legenda(c, serie);
+    var W = Math.max(280, Math.round(c.clientWidth || 720)), H = 220, sx = 44, dx = 8, sopra = 8, sotto = 24;
+    var max = 0;
+    righe.forEach(function (r) { var t = 0; serie.forEach(function (s) { t += r[s.chiave] || 0; }); max = Math.max(max, t); });
+    var top = tetto(max);
+    var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': c.previousElementSibling ? c.previousElementSibling.textContent : '' });
+    for (var g = 0; g <= 4; g++) {
+      var y = sopra + (H - sopra - sotto) * (1 - g / 4);
+      s.append(svg('line', { x1: sx, x2: W - dx, y1: y, y2: y, stroke: 'var(--griglia)', 'stroke-width': 1 }));
+      var t = svg('text', { x: sx - 6, y: y + 4, 'text-anchor': 'end' }); t.textContent = formato(top * g / 4); s.append(t);
+    }
+    var n = righe.length, passo = (W - sx - dx) / n, larg = Math.max(2, Math.min(28, passo * 0.68));
+    var ogni = Math.ceil(n / Math.max(3, Math.floor((W - sx) / 70)));
+    var tip = suggerimento(c);
+    if (animaProssimo) c.classList.add('anima'); else c.classList.remove('anima');
+    righe.forEach(function (r, i) {
+      var x = sx + passo * i + (passo - larg) / 2, base = H - sotto, alt = H - sopra - sotto;
+      var accumulato = 0;
+      var gruppo = svg('g', { class: 'gruppo' }); s.append(gruppo);
+      serie.forEach(function (se, k) {
+        var v = r[se.chiave] || 0; if (v <= 0) return;
+        var h = alt * v / top;
+        var y = base - accumulato - h;
+        var ultima = true;
+        for (var j = k + 1; j < serie.length; j++) if ((r[serie[j].chiave] || 0) > 0) ultima = false;
+        var hh = accumulato > 0 ? h - 2 : h;
+        if (hh > 0) {
+          var pezzo = svg('path', { d: ultima ? colonna(x, y, larg, hh, 4) : 'M' + x + ',' + y + 'h' + larg + 'v' + hh + 'h' + (-larg) + 'Z', fill: se.colore, class: 'cresce-su' });
+          pezzo.style.setProperty('--k', i);
+          gruppo.append(pezzo);
+        }
+        accumulato += h;
+      });
+      if ((i % ogni === 0 && n - 1 - i >= ogni / 2) || i === n - 1) { var et = svg('text', { x: x + larg / 2, y: H - 6, 'text-anchor': 'middle' }); et.textContent = giornoCorto(r.giorno); s.append(et); }
+      var area = svg('rect', { x: sx + passo * i, y: sopra, width: passo, height: alt, fill: 'transparent' });
+      area.addEventListener('mouseenter', function () { s.classList.add('passaggio'); gruppo.classList.add('acceso'); });
+      area.addEventListener('mousemove', function (ev) {
+        var tot = 0; var vv = serie.map(function (se) { tot += r[se.chiave] || 0; return { nome: se.nome, valore: formato(r[se.chiave] || 0), colore: se.colore }; });
+        if (serie.length > 1) vv.push({ nome: 'Totale', valore: formato(tot) });
+        riempiSuggerimento(tip, giornoLungo(r.giorno), vv);
+        var box = c.getBoundingClientRect();
+        tip.style.display = 'block';
+        var lx = ev.clientX - box.left + 12; if (lx + tip.offsetWidth > box.width) lx = ev.clientX - box.left - tip.offsetWidth - 12;
+        tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+      });
+      area.addEventListener('mouseleave', function () { tip.style.display = 'none'; s.classList.remove('passaggio'); gruppo.classList.remove('acceso'); });
+      s.append(area);
+    });
+    c.append(s);
+    tabelle[id] = { intestazioni: ['Giorno'].concat(serie.map(function (x) { return x.nome; })).concat(serie.length > 1 ? ['Totale'] : []), righe: righe.slice().reverse().map(function (r) { var tot = 0; var cel = serie.map(function (se) { tot += r[se.chiave] || 0; return formato(r[se.chiave] || 0); }); return [giornoLungo(r.giorno)].concat(cel).concat(serie.length > 1 ? [formato(tot)] : []); }) };
+  }
+  /* Barre orizzontali per categorie, impilate se ci sono piu' serie. Etichette dirette. */
+  function barreCategorie(id, voci, serie, formato) {
+    var c = $(id); c.innerHTML = '';
+    voci = voci.filter(function (v) { var t = 0; serie.forEach(function (s) { t += v[s.chiave] || 0; }); return t > 0; });
+    if (voci.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Nessun dato nel periodo.')); tabelle[id] = { intestazioni: [], righe: [] }; return; }
+    legenda(c, serie);
+    var W = Math.max(280, Math.round(c.clientWidth || 520)), riga = 34, sx = Math.min(140, Math.round(W * 0.34)), dx = 64, H = voci.length * riga + 4;
+    var max = 0; voci.forEach(function (v) { var t = 0; serie.forEach(function (s) { t += v[s.chiave] || 0; }); max = Math.max(max, t); });
+    var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img' });
+    var tip = suggerimento(c);
+    if (animaProssimo) c.classList.add('anima'); else c.classList.remove('anima');
+    voci.forEach(function (v, i) {
+      var y = i * riga + 6, h = riga - 14, x = sx, tot = 0;
+      var gruppo = svg('g', { class: 'gruppo' }); s.append(gruppo);
+      var nome = svg('text', { x: sx - 8, y: y + h / 2 + 4, 'text-anchor': 'end' }); nome.textContent = v.nome; nome.style.fill = 'var(--testo-2)'; s.append(nome);
+      serie.forEach(function (se, k) {
+        var val = v[se.chiave] || 0; if (val <= 0) return;
+        var w = (W - sx - dx) * val / max;
+        var ww = x > sx ? w - 2 : w;
+        if (ww > 0) {
+          var barra = svg('rect', { x: x > sx ? x + 2 : x, y: y, width: ww, height: h, rx: 3, fill: se.colore, class: 'barra cresce-dx' });
+          barra.style.setProperty('--k', i);
+          gruppo.append(barra);
+        }
+        x += w; tot += val;
+      });
+      var et = svg('text', { x: x + 6, y: y + h / 2 + 4, class: 'etichetta-dato' }); et.textContent = formato(tot); et.style.fill = 'var(--testo)'; et.style.setProperty('--k', i); s.append(et);
+      var area = svg('rect', { x: 0, y: y - 4, width: W, height: riga, fill: 'transparent' });
+      area.addEventListener('mouseenter', function () { s.classList.add('passaggio'); gruppo.classList.add('acceso'); });
+      area.addEventListener('mousemove', function (ev) {
+        riempiSuggerimento(tip, v.nome, serie.map(function (se) { return { nome: se.nome, valore: formato(v[se.chiave] || 0), colore: se.colore }; }));
+        var box = c.getBoundingClientRect(); tip.style.display = 'block';
+        var lx = ev.clientX - box.left + 12; if (lx + tip.offsetWidth > box.width) lx = ev.clientX - box.left - tip.offsetWidth - 12;
+        tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+      });
+      area.addEventListener('mouseleave', function () { tip.style.display = 'none'; s.classList.remove('passaggio'); gruppo.classList.remove('acceso'); });
+      s.append(area);
+    });
+    c.append(s);
+    tabelle[id] = { intestazioni: [''].concat(serie.map(function (x) { return x.nome; })), righe: voci.map(function (v) { return [v.nome].concat(serie.map(function (se) { return formato(v[se.chiave] || 0); })); }) };
+  }
+  function tabella(contenitore, intestazioni, righe, allineaSinistra) {
+    var c = typeof contenitore === 'string' ? $(contenitore) : contenitore;
+    c.innerHTML = '';
+    if (righe.length === 0) { c.append(el('div', { class: 'vuoto' }, 'Niente da mostrare.')); return; }
+    var t = el('table'), th = el('thead'), tr = el('tr');
+    intestazioni.forEach(function (h, i) { tr.append(el('th', allineaSinistra && allineaSinistra.indexOf(i) >= 0 ? { class: 'sinistra' } : null, h)); });
+    th.append(tr); t.append(th);
+    var tb = el('tbody');
+    righe.forEach(function (r) {
+      var riga = el('tr');
+      r.forEach(function (v, i) {
+        var td = el('td', allineaSinistra && allineaSinistra.indexOf(i) >= 0 ? { class: 'sinistra' } : null);
+        if (v instanceof Node) td.append(v); else td.textContent = v;
+        riga.append(td);
+      });
+      tb.append(riga);
+    });
+    t.append(tb); c.append(t);
+  }
+  function statoEtichetta(tipo, testo) {
+    var s = el('span', { class: 'etichetta-stato ' + tipo });
+    s.textContent = (tipo === 'ok' ? '● ' : tipo === 'att' ? '▲ ' : '■ ') + testo;
+    return s;
+  }
+  /* «Vedi tabella»: il grafico diventa la sua tabella, e viceversa. */
+  document.querySelectorAll('.link-tabella').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-tabella'), c = $(id);
+      if (b.getAttribute('data-aperta') === '1') { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; disegna(); return; }
+      var t = tabelle[id]; if (!t) return;
+      b.setAttribute('data-aperta', '1'); b.textContent = 'Vedi grafico';
+      var w = el('div', { class: 'tabella-wrap tabella-alta' }); c.innerHTML = ''; c.append(w);
+      tabella(w, t.intestazioni, t.righe, [0]);
+    });
+  });
+
+
+  // ── i dati del creator ───────────────────────────────────────────────────
+  function disegna() {
+    document.querySelectorAll('.link-tabella').forEach(function (b) { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; });
+    var c = dati.creator;
+    if (!c) return;
+    $('nome-creator').textContent = c.nome;
+    document.title = 'Area creator ' + c.nome;
+    var valide = c.vendite.filter(function (v) { return !v.x; });
+    mostraNumero('t-vendite', valide.length, numeroIntero);
+    $('t-vendite-d').textContent = numero(c.mese) + ' Mensile · ' + numero(c.pass) + ' Season Pass';
+    mostraNumero('t-maturato', c.maturato, euroIntero);
+    mostraNumero('t-pagato', c.pagato, euroIntero);
+    $('t-pagato-d').textContent = c.pagamenti.length ? 'Ultimo il ' + data(c.pagamenti[c.pagamenti.length - 1].quando) : 'Nessun pagamento ancora';
+    mostraNumero('t-dapagare', c.daPagare, euroIntero);
+    var perGiorno = {};
+    for (var i = 0; i < giorni; i++) { var g = new Date(Date.now() - i * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); perGiorno[g] = { giorno: g, mese: 0, pass: 0 }; }
+    valide.forEach(function (v) { var g = new Date(v.q).toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); if (perGiorno[g]) perGiorno[g][v.p]++; });
+    var righe = Object.keys(perGiorno).sort().map(function (k) { return perGiorno[k]; });
+    colonneNelTempo('g-giorni', righe, [{ chiave: 'mese', nome: 'Mensile', colore: 'var(--s1)' }, { chiave: 'pass', nome: 'Season Pass', colore: 'var(--s3)' }], numero);
+    scintilla('t-vendite', righe.slice(-14).map(function (r) { return r.mese + r.pass; }));
+    var perPiano = { mese: 0, pass: 0 };
+    valide.forEach(function (v) { perPiano[v.p] += v.c; });
+    barreCategorie('g-piani', [{ nome: 'Mensile', n: perPiano.mese }, { nome: 'Season Pass', n: perPiano.pass }], [{ chiave: 'n', nome: 'Guadagnato', colore: 'var(--s2)' }], euroCorto);
+    tabella('tab-vendite', ['Data', 'Piano', 'Cliente', 'Ha pagato', 'Tu guadagni'], c.vendite.map(function (v) {
+      var comm = v.x ? statoEtichetta('ko', 'rimborsata') : v.c ? euro(v.c) : statoEtichetta('att', '0 € · cliente già contato');
+      return [new Date(v.q).toLocaleString('it-IT', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), NOMI_PIANO[v.p] || v.p, v.e || '—', euro(v.i), comm];
+    }), [0, 1, 2]);
+    $('link-1').textContent = 'https://ilmagodifut.com/premium?codice=' + c.codiceMese;
+    $('cod-mese').textContent = c.codiceMese;
+    $('cod-pass').textContent = c.codicePass;
+    var pr = $('pagamenti-ricevuti'); pr.innerHTML = '';
+    if (c.pagamenti.length) {
+      pr.append(el('h2', { style: 'margin-top:14px' }, 'Pagamenti ricevuti'));
+      var w = el('div', { class: 'tabella-wrap' }); pr.append(w);
+      tabella(w, ['Data', 'Importo'], c.pagamenti.slice().reverse().map(function (p) { return [data(p.quando), euro(p.importo)]; }), [0]);
+    }
+  }
+
+  function aggiorna() {
+    var k = $('chiave').value.trim();
+    if (k === '') { $('stato-generale').textContent = 'Scrivi la tua chiave.'; return; }
+    var b = $('aggiorna'); b.disabled = true; b.classList.add('gira');
+    animaProssimo = true;
+    fetch(API + '/v1/creator/dati', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ chiave: k }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r || !r.ok) throw new Error(ERRORI[r && r.errore] || 'Non riesco a leggere i tuoi dati.');
+        try { localStorage.setItem(MEMORIA, k); } catch (e) { /* niente memoria */ }
+        dati.creator = r.creator;
+        disegna();
+        var st = $('stato-generale'); st.innerHTML = '';
+        st.append(el('span', { class: 'punto' }), document.createTextNode('Dati aggiornati alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })));
+      })
+      .catch(function (e) { $('stato-generale').textContent = e.message; })
+      .then(function () { b.disabled = false; b.classList.remove('gira'); });
+  }
+  $('aggiorna').addEventListener('click', aggiorna);
+  $('chiave').addEventListener('keydown', function (e) { if (e.key === 'Enter') aggiorna(); });
+  document.querySelectorAll('.segmenti button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.segmenti button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      giorni = Number(b.getAttribute('data-giorni'));
+      animaProssimo = true;
+      disegna();
+    });
+  });
+  document.querySelectorAll('[data-copia]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = $(b.getAttribute('data-copia')).textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { mostra('esito-copia', true, 'Copiato.'); }, function () { mostra('esito-copia', false, 'Copia a mano: ' + t); });
+    });
+  });
+
+  /* La chiave dal link privato (#k=...), poi la si toglie dalla barra degli indirizzi. */
+  var dalLink = (location.hash.match(/[#&]k=([^&]+)/) || [])[1];
+  var salvata = '';
+  try { salvata = localStorage.getItem(MEMORIA) || ''; } catch (e) { /* niente memoria */ }
+  var k = dalLink ? decodeURIComponent(dalLink) : salvata;
+  if (dalLink && history.replaceState) history.replaceState(null, '', location.pathname);
+  if (k) { $('chiave').value = k; aggiorna(); }
+  /* Ogni 5 minuti, se la pagina resta aperta. */
+  setInterval(function () { if ($('chiave').value.trim() !== '' && !document.hidden) aggiorna(); }, 5 * 60 * 1000);
+})();
+</script>
+</body>
+</html>

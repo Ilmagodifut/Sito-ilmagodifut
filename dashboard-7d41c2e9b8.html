@@ -46,6 +46,7 @@
   input, select { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--bordo); background: #0d1117; color: var(--testo); font: inherit; min-width: 0; }
   input:focus, select:focus, button:focus-visible { outline: 2px solid var(--verde); outline-offset: 1px; }
   button { padding: 10px 16px; border-radius: 9px; border: none; font: 800 14px system-ui, sans-serif; cursor: pointer; background: var(--verde); color: #000; }
+  button.piccolo { padding: 6px 12px; font-size: 12px; }
   button.neutro { background: #1b222c; color: var(--testo); border: 1px solid var(--bordo); font-weight: 700; }
   button:disabled { opacity: .5; cursor: default; }
   .segmenti { display: inline-flex; border: 1px solid var(--bordo); border-radius: 9px; overflow: hidden; }
@@ -172,6 +173,7 @@
     <button type="button" role="tab" aria-selected="false" data-vista="futmago">FUTMAGO</button>
     <button type="button" role="tab" aria-selected="false" data-vista="elite">Elite</button>
     <button type="button" role="tab" aria-selected="false" data-vista="incassi">Incassi</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="creator">Creator</button>
     <button type="button" role="tab" aria-selected="false" data-vista="assistenza">Utenti e assistenza</button>
   </nav>
 
@@ -327,6 +329,64 @@
   </div>
 
   <!-- ═══ UTENTI E ASSISTENZA ═══ -->
+  <!-- ═══ CREATOR ═══ (CHIESTO il 22/10/2026: primo affiliato ONLYONELY) -->
+  <div class="vista" id="vista-creator">
+    <div class="griglia">
+      <section style="--i:1" class="box tessera c3"><div class="etichetta">Vendite con codice creator</div><div class="riga-num"><div class="numero attesa" id="cr-vendite">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="cr-vendite-d">&nbsp;</div></section>
+      <section style="--i:2" class="box tessera c3"><div class="etichetta">Incassato con i codici</div><div class="riga-num"><div class="numero attesa" id="cr-incassato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">Quanto hanno pagato i clienti</div></section>
+      <section style="--i:3" class="box tessera c3"><div class="etichetta">Commissioni maturate</div><div class="riga-num"><div class="numero attesa" id="cr-maturato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">2 € Mensile · 5 € Season, solo la prima vendita</div></section>
+      <section style="--i:4" class="box tessera c3"><div class="etichetta">Da pagare ai creator</div><div class="riga-num"><div class="numero attesa" id="cr-dapagare">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="cr-dapagare-d">&nbsp;</div></section>
+
+      <section style="--i:5" class="box c12">
+        <h2>I creator</h2>
+        <p class="sotto">Ogni creator ha due codici (Mensile e Season Pass) e una pagina sua con i propri numeri.</p>
+        <div class="tabella-wrap" id="tab-creator"></div>
+      </section>
+      <section style="--i:6" class="box c8">
+        <div class="riga-titolo"><h2>Vendite dei creator al giorno</h2><button class="link-tabella" data-tabella="g-creator-giorni">Vedi tabella</button></div>
+        <p class="sotto">Pagamenti fatti con un codice creator, nel periodo scelto.</p>
+        <div class="grafico" id="g-creator-giorni"></div>
+      </section>
+      <section style="--i:7" class="box c4">
+        <div class="riga-titolo"><h2>Commissioni per creator</h2><button class="link-tabella" data-tabella="g-creator-comm">Vedi tabella</button></div>
+        <p class="sotto">Maturate in tutto, al netto delle vendite annullate.</p>
+        <div class="grafico" id="g-creator-comm"></div>
+      </section>
+      <section style="--i:8" class="box c12">
+        <h2>Ultime vendite</h2>
+        <p class="sotto">Se una vendita viene rimborsata su Stripe, annullala qui: la commissione sparisce anche dalla pagina del creator.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-creator-vendite"></div>
+        <div class="esito" id="esito-cr-vendite"></div>
+      </section>
+      <section style="--i:9" class="box c6">
+        <h2>Paga un creator</h2>
+        <p class="sotto">Quando gli hai dato i soldi, segnalo qui: si scala dal «da pagare», anche nella sua pagina.</p>
+        <label for="cr-sel">Creator</label>
+        <select id="cr-sel" class="campo"></select>
+        <label for="cr-importo">Importo pagato (€)</label>
+        <input type="number" id="cr-importo" class="campo" min="0" step="0.01" placeholder="es. 25">
+        <div class="fila"><button type="button" id="cr-paga">Segna pagato</button><button type="button" id="cr-chiave" class="neutro">Nuova chiave d'accesso</button></div>
+        <div class="esito" id="esito-cr-paga"></div>
+      </section>
+      <section style="--i:10" class="box c6">
+        <h2>Nuovo creator</h2>
+        <p class="sotto">Prima crea su Stripe i due coupon (Mensile −1 € una volta, Season −5 €) col codice promozionale, poi copia qui gli ID «promo_…».</p>
+        <label for="cr-nome">Nome</label>
+        <input type="text" id="cr-nome" class="campo" placeholder="ONLYONELY">
+        <div class="fila" style="margin-top:0">
+          <div style="flex:1 1 160px"><label for="cr-cm">Codice Mensile</label><input type="text" id="cr-cm" class="campo" placeholder="ONLYONELY"></div>
+          <div style="flex:1 1 160px"><label for="cr-cp">Codice Season Pass</label><input type="text" id="cr-cp" class="campo" placeholder="ONLYPASS"></div>
+        </div>
+        <div class="fila" style="margin-top:0">
+          <div style="flex:1 1 160px"><label for="cr-pm">ID promo Mensile</label><input type="text" id="cr-pm" class="campo" placeholder="promo_…"></div>
+          <div style="flex:1 1 160px"><label for="cr-pp">ID promo Season</label><input type="text" id="cr-pp" class="campo" placeholder="promo_…"></div>
+        </div>
+        <div class="fila"><button type="button" id="cr-crea">Crea creator</button></div>
+        <div class="esito" id="esito-cr-crea"></div>
+      </section>
+    </div>
+  </div>
+
   <div class="vista" id="vista-assistenza">
     <div class="griglia">
       <section style="--i:1" class="box c12 scheda-utente">
@@ -386,7 +446,13 @@
     'email-non-valida': 'L’email non è valida.',
     'email-non-valide': 'Controlla le due email: devono essere valide e diverse.',
     'nessun-premium-su-questa-email': 'Su quell’email non c’è un Premium attivo da spostare.',
-    'non-trovato': 'Il server non conosce ancora la dashboard: va pubblicato il server aggiornato.'
+    'non-trovato': 'Il server non conosce ancora la dashboard: va pubblicato il server aggiornato.',
+    'parte-sconosciuta': 'Il server non conosce ancora questa parte: va pubblicato il server aggiornato.',
+    'creator-esiste': 'Esiste già un creator con questo nome.',
+    'codice-gia-usato': 'Uno dei due codici è già di un altro creator.',
+    'codici-non-validi': 'I codici devono essere due, diversi, solo lettere e numeri (3-24).',
+    'promo-non-validi': 'Gli ID promo devono iniziare con «promo_».',
+    'nome-non-valido': 'Scrivi un nome valido.'
   };
   var NOMI_FUNZIONI = { 'sbc': 'SBC', 'snipe': 'SNIPE', 'album': 'Album', 'automago': 'AUTOMAGO', 'soluzioni-multiple': 'Soluzioni multiple', 'completa-tutte': 'Completa tutte', 'pacchetti': 'Pacchetti' };
   var NOMI_PIANI = { mensile: 'Mensile', stagione: 'Stagione', regalo: 'Regalo', free: 'Free', mini: 'Mini Pass', season: 'Season Pass' };
@@ -655,8 +721,81 @@
   });
 
   // ── disegno di tutte le viste dai dati caricati ─────────────────────────
+  // ── il programma creator ─────────────────────────────────────────────
+  var NOMI_PIANO_CREATOR = { mese: 'Mensile', pass: 'Season Pass' };
+  function linkCreator(chiaveCreator) { return 'https://ilmagodifut.com/creator#k=' + encodeURIComponent(chiaveCreator); }
+  function disegnaCreator() {
+    var lista = dati.creator;
+    if (!lista) return;
+    var tutte = [];
+    lista.forEach(function (c) { c.vendite.forEach(function (v) { tutte.push({ v: v, c: c }); }); });
+    var valide = tutte.filter(function (x) { return !x.v.x; });
+    var mese = valide.filter(function (x) { return x.v.p === 'mese'; }).length;
+    var tot = function (k) { return lista.reduce(function (t, c) { return t + c[k]; }, 0); };
+    mostraNumero('cr-vendite', valide.length, numeroIntero);
+    $('cr-vendite-d').textContent = numero(mese) + ' Mensile · ' + numero(valide.length - mese) + ' Season Pass';
+    mostraNumero('cr-incassato', tot('incassato'), euroIntero);
+    mostraNumero('cr-maturato', tot('maturato'), euroIntero);
+    mostraNumero('cr-dapagare', tot('daPagare'), euroIntero);
+    $('cr-dapagare-d').textContent = euro(tot('pagato')) + ' già pagati';
+    var perGiorno = {};
+    for (var i = 0; i < giorni; i++) { var g = new Date(Date.now() - i * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); perGiorno[g] = { giorno: g, mese: 0, pass: 0 }; }
+    valide.forEach(function (x) { var g = new Date(x.v.q).toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); if (perGiorno[g]) perGiorno[g][x.v.p]++; });
+    var righe = Object.keys(perGiorno).sort().map(function (k) { return perGiorno[k]; });
+    colonneNelTempo('g-creator-giorni', righe, [{ chiave: 'mese', nome: 'Mensile', colore: 'var(--s1)' }, { chiave: 'pass', nome: 'Season Pass', colore: 'var(--s3)' }], numero);
+    scintilla('cr-vendite', righe.slice(-14).map(function (r) { return r.mese + r.pass; }));
+    barreCategorie('g-creator-comm', lista.map(function (c) { return { nome: c.nome, n: c.maturato }; }), [{ chiave: 'n', nome: 'Maturate', colore: 'var(--s2)' }], euroCorto);
+    tabella('tab-creator', ['Creator', 'Codici', 'Mensile', 'Season', 'Incassato', 'Maturato', 'Pagato', 'Da pagare', 'Dal'], lista.map(function (c) {
+      return [c.nome, c.codiceMese + ' · ' + c.codicePass, numero(c.mese), numero(c.pass), euro(c.incassato), euro(c.maturato), euro(c.pagato), euro(c.daPagare), data(c.creatoIl)];
+    }), [0, 1]);
+    tutte.sort(function (a, b) { return b.v.q - a.v.q; });
+    tabella('tab-creator-vendite', ['Data', 'Creator', 'Piano', 'Cliente', 'Pagato', 'Commissione', ''], tutte.slice(0, 100).map(function (x) {
+      var b = el('button', { type: 'button', class: 'neutro piccolo' }, x.v.x ? 'Ripristina' : 'Annulla');
+      b.addEventListener('click', function () {
+        if (!x.v.x && !confirm('Annullare questa vendita? La commissione non conterà più.')) return;
+        parte('creator-annulla', { vendita: x.v.chiave, annullata: !x.v.x })
+          .then(function () { x.v.x = x.v.x ? 0 : 1; return parte('creator'); })
+          .then(function (r) { dati.creator = r.creator; disegna(); mostra('esito-cr-vendite', true, 'Fatto.'); })
+          .catch(function (e) { mostra('esito-cr-vendite', false, e.message); });
+      });
+      var comm = x.v.x ? statoEtichetta('ko', 'annullata') : x.v.c ? euro(x.v.c) : statoEtichetta('att', '0 € · cliente già contato');
+      return [new Date(x.v.q).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.c.nome, NOMI_PIANO_CREATOR[x.v.p] || x.v.p, x.v.e || '—', euro(x.v.i), comm, b];
+    }), [0, 1, 2, 3]);
+    var sel = $('cr-sel'), prima = sel.value;
+    sel.innerHTML = '';
+    lista.forEach(function (c) { var o = el('option', { value: c.id }, c.nome + ' — da pagare ' + euro(c.daPagare)); sel.append(o); });
+    if (prima) sel.value = prima;
+  }
+  $('cr-paga').addEventListener('click', function () {
+    var id = $('cr-sel').value, cent = Math.round(Number(String($('cr-importo').value).replace(',', '.')) * 100);
+    if (!id || !(cent > 0)) { mostra('esito-cr-paga', false, 'Scegli il creator e scrivi l’importo.'); return; }
+    parte('creator-pagato', { id: id, importo: cent })
+      .then(function () { return parte('creator'); })
+      .then(function (r) { dati.creator = r.creator; disegna(); mostra('esito-cr-paga', true, 'Segnato: ' + euro(cent) + ' pagati.'); $('cr-importo').value = ''; })
+      .catch(function (e) { mostra('esito-cr-paga', false, e.message); });
+  });
+  $('cr-chiave').addEventListener('click', function () {
+    var id = $('cr-sel').value;
+    if (!id || !confirm('Fare una chiave nuova? Il link che il creator ha adesso smetterà di funzionare.')) return;
+    parte('creator-chiave', { id: id })
+      .then(function (r) { mostra('esito-cr-paga', true, 'Nuovo link privato da mandare al creator: ' + linkCreator(r.chiave)); })
+      .catch(function (e) { mostra('esito-cr-paga', false, e.message); });
+  });
+  $('cr-crea').addEventListener('click', function () {
+    var corpo = { nome: $('cr-nome').value.trim(), codiceMese: $('cr-cm').value.trim(), codicePass: $('cr-cp').value.trim(), promoMese: $('cr-pm').value.trim(), promoPass: $('cr-pp').value.trim() };
+    parte('creator-crea', corpo)
+      .then(function (r) {
+        mostra('esito-cr-crea', true, 'Creato. Link privato da mandare al creator (non lo vedrai più, tienilo): ' + linkCreator(r.chiave) +
+          ' — Link affiliato: https://ilmagodifut.com/premium?codice=' + corpo.codiceMese.toUpperCase() + ' e https://ilmagodifut.com/premium?codice=' + corpo.codicePass.toUpperCase());
+        return parte('creator');
+      })
+      .then(function (r) { dati.creator = r.creator; disegna(); })
+      .catch(function (e) { mostra('esito-cr-crea', false, e.message); });
+  });
+
   function disegna() {
     disegnaPaypal();
+    disegnaCreator();
     document.querySelectorAll('.link-tabella').forEach(function (b) { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; });
     var PREMIUM = { chiave: 'premium', nome: 'Premium', colore: 'var(--s1)' };
     var FREE = { chiave: 'free', nome: 'Free', colore: 'var(--s2)' };
@@ -840,7 +979,8 @@
       ['uso', function (r) { dati.uso = r.uso; }],
       ['elite', function (r) { dati.elite = r.elite; }],
       ['incassi', function (r) { dati.incassi = r.incassi; }],
-      ['conti', function (r) { dati.conti = r.conti; }]
+      ['conti', function (r) { dati.conti = r.conti; }],
+      ['creator', function (r) { dati.creator = r.creator; }]
     ];
     var errori = [], fatte = 0;
     var giorniChiesti = giorni;

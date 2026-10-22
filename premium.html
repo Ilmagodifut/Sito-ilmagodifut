@@ -131,6 +131,24 @@
    */
   .pricing-price .cent { font-size: .42em; font-weight: 700; letter-spacing: -.01em; }
 
+  /* Il prezzo pieno barrato accanto a quello col codice creator. */
+  .pricing-prima { color: var(--text-muted); text-decoration: line-through; font-weight: 600; font-size: 1.05rem; margin-right: .5rem; align-self: center; }
+  .pricing-prima[hidden] { display: none; }
+
+  .fm-codice { max-width: 820px; margin: 1.4rem auto 0; }
+  .fm-codice-attivo { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; background: rgba(57,255,20,.07); border: 1px solid var(--green); border-radius: 12px; padding: .9rem 1.1rem; color: var(--text); font-size: .95rem; }
+  .fm-codice-attivo[hidden] { display: none; }
+  .fm-codice-spunta { color: var(--green); font-weight: 800; }
+  .fm-codice-togli { margin-left: auto; background: none; border: 1px solid var(--border-dim); color: var(--text-muted); border-radius: 8px; padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .85rem; }
+  .fm-codice-modulo { display: grid; gap: .5rem; justify-items: center; }
+  .fm-codice-modulo[hidden] { display: none; }
+  .fm-codice-modulo label { color: var(--text-muted); font-size: .9rem; }
+  .fm-codice-riga { display: flex; gap: .5rem; width: 100%; max-width: 380px; }
+  .fm-codice-riga input { flex: 1; min-width: 0; padding: .7rem .9rem; border-radius: 8px; border: 1px solid #2f3b49; background: #12161d; color: #fff; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; }
+  .fm-codice-riga input:focus { outline: none; border-color: var(--green); }
+  .fm-codice-riga button { border: 1px solid var(--green); background: transparent; color: var(--green); border-radius: 8px; padding: .7rem 1.1rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .fm-codice-errore { color: #ff8a8a; font-size: .88rem; margin: 0; }
+
   .piani-note { display: grid; gap: .9rem; margin-top: 1.4rem; }
   .piani-nota {
     background: var(--black2); border: 1px solid var(--border-dim);
@@ -220,9 +238,10 @@
           <div class="pricing-name">MENSILE</div>
           <div class="pricing-desc">Tutto FUTMAGO senza limiti, mese per mese.</div>
           <div class="pricing-price-row">
-            <span class="pricing-price">5<span class="cent">,99</span><sup>€</sup></span>
+            <span class="pricing-prima" data-prima-mese hidden>5,99 €</span>
+            <span class="pricing-price" data-prezzo-mese>5<span class="cent">,99</span><sup>€</sup></span>
           </div>
-          <div class="pricing-period">annulla quando vuoi</div>
+          <div class="pricing-period" data-periodo-mese>annulla quando vuoi</div>
           <ul class="pricing-features">
             <li><span class="check">✓</span> Risolutore automatico SBC <span class="val">senza limiti</span></li>
             <li><span class="check">✓</span> Risolvi la stessa SBC più volte <span class="val">incluso</span></li>
@@ -246,7 +265,8 @@
           <div class="pricing-name">STAGIONE FC 27</div>
           <div class="pricing-desc">Tutto FUTMAGO senza limiti per tutta la stagione.</div>
           <div class="pricing-price-row">
-            <span class="pricing-price">39<span class="cent">,99</span><sup>€</sup></span>
+            <span class="pricing-prima" data-prima-pass hidden>39,99 €</span>
+            <span class="pricing-price" data-prezzo-pass>39<span class="cent">,99</span><sup>€</sup></span>
           </div>
           <div class="pricing-period">accesso per tutto FC 27</div>
           <ul class="pricing-features">
@@ -266,6 +286,27 @@
           </ul>
           <a class="pricing-cta" data-paga-stagione href="#">Acquista</a>
         </div>
+      </div>
+
+      <!-- ── IL CODICE CREATOR ───────────────────────────────────────────
+           CHIESTO il 22/10/2026 (primo affiliato: ONLYONELY). Il codice
+           arriva dal link del creator (?codice=...) o si scrive qui; il
+           server dice di chi e' e quali sono i suoi due codici, uno per
+           piano, e il pagamento parte con quello giusto gia' inserito. -->
+      <div class="fm-codice" data-codice-box>
+        <div class="fm-codice-attivo" data-codice-attivo hidden>
+          <span class="fm-codice-spunta">✓</span>
+          <span>Codice creator <b data-codice-nome></b> attivo: <b>Mensile 4,99 € il primo mese</b> e <b>Stagione FC 27 a 34,99 €</b>.</span>
+          <button type="button" class="fm-codice-togli" data-codice-togli>Rimuovi</button>
+        </div>
+        <form class="fm-codice-modulo" data-codice-modulo novalidate>
+          <label for="fm-codice-campo">Hai un codice creator?</label>
+          <div class="fm-codice-riga">
+            <input id="fm-codice-campo" data-codice-campo autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODICE" maxlength="24">
+            <button type="submit" data-codice-applica>Applica</button>
+          </div>
+          <p class="fm-codice-errore" data-codice-errore hidden></p>
+        </form>
       </div>
 
       <div class="piani-note">
@@ -511,6 +552,96 @@
         location.href = destinazione + (destinazione.indexOf('?') >= 0 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(email);
       });
   });
+})();
+</script>
+<script>
+/*
+ * ── IL CODICE CREATOR ───────────────────────────────────────────────────
+ *
+ * Il codice si ricorda per 30 giorni: chi arriva dal link del creator e paga
+ * il giorno dopo deve avere lo stesso sconto (e il creator la sua vendita).
+ * Si aggiunge ai due tasti come `prefilled_promo_code`: Stripe lo applica da
+ * solo, e il codice di un piano sull'altro Stripe lo rifiuta comunque.
+ */
+(function () {
+  var API = 'https://futmago-licenza.futmago-api.workers.dev';
+  var MEMORIA = 'fm.codiceCreator';
+  var TRENTA_GIORNI = 30 * 24 * 60 * 60 * 1000;
+  var box = document.querySelector('[data-codice-box]');
+  if (!box) return;
+  var attivo = box.querySelector('[data-codice-attivo]');
+  var modulo = box.querySelector('[data-codice-modulo]');
+  var campo = box.querySelector('[data-codice-campo]');
+  var errore = box.querySelector('[data-codice-errore]');
+  var nome = box.querySelector('[data-codice-nome]');
+  var tasti = { mese: document.querySelector('[data-paga-mese]'), pass: document.querySelector('[data-paga-stagione]') };
+  var originali = { mese: null, pass: null };
+
+  function conCodice(href, codice) {
+    if (!href || href.indexOf('https://') !== 0) return href;
+    if (!codice) return href;
+    return href + (href.indexOf('?') >= 0 ? '&' : '?') + 'prefilled_promo_code=' + encodeURIComponent(codice);
+  }
+  function prezzo(sel, intero, cent) {
+    var el = document.querySelector(sel);
+    if (el) el.innerHTML = intero + '<span class="cent">,' + cent + '</span><sup>€</sup>';
+  }
+  function mostra(dati) {
+    ['mese', 'pass'].forEach(function (p) {
+      var t = tasti[p];
+      if (!t) return;
+      if (originali[p] === null) originali[p] = t.getAttribute('href') || '';
+      t.setAttribute('href', conCodice(originali[p], dati ? dati[p] : ''));
+    });
+    document.querySelector('[data-prima-mese]').hidden = !dati;
+    document.querySelector('[data-prima-pass]').hidden = !dati;
+    if (dati) {
+      prezzo('[data-prezzo-mese]', 4, 99);
+      prezzo('[data-prezzo-pass]', 34, 99);
+      document.querySelector('[data-periodo-mese]').textContent = 'il primo mese, poi 5,99 € al mese';
+      nome.textContent = dati.nome;
+    } else {
+      prezzo('[data-prezzo-mese]', 5, 99);
+      prezzo('[data-prezzo-pass]', 39, 99);
+      document.querySelector('[data-periodo-mese]').textContent = 'annulla quando vuoi';
+    }
+    attivo.hidden = !dati;
+    modulo.hidden = !!dati;
+  }
+  function ricorda(codice) {
+    try {
+      if (codice) localStorage.setItem(MEMORIA, JSON.stringify({ codice: codice, quando: Date.now() }));
+      else localStorage.removeItem(MEMORIA);
+    } catch (e) { /* senza memoria vale per questa visita */ }
+  }
+  function prova(codice, silenzioso) {
+    codice = String(codice || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{3,24}$/.test(codice)) {
+      if (!silenzioso) { errore.textContent = 'Codice non valido.'; errore.hidden = false; }
+      return;
+    }
+    errore.hidden = true;
+    fetch(API + '/v1/creator/codice', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ codice: codice }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (r && r.ok) { ricorda(codice); mostra(r); return; }
+        if (!silenzioso) { errore.textContent = 'Questo codice non esiste.'; errore.hidden = false; }
+        else ricorda('');
+      })
+      .catch(function () {
+        if (!silenzioso) { errore.textContent = 'Non riesco a controllare il codice: riprova tra poco.'; errore.hidden = false; }
+      });
+  }
+
+  modulo.addEventListener('submit', function (e) { e.preventDefault(); prova(campo.value, false); });
+  box.querySelector('[data-codice-togli]').addEventListener('click', function () { ricorda(''); mostra(null); campo.value = ''; });
+
+  var dalLink = (location.search.match(/[?&]codice=([^&]+)/) || [])[1];
+  if (dalLink) { prova(decodeURIComponent(dalLink), true); return; }
+  try {
+    var salvato = JSON.parse(localStorage.getItem(MEMORIA) || 'null');
+    if (salvato && salvato.codice && Date.now() - salvato.quando < TRENTA_GIORNI) prova(salvato.codice, true);
+  } catch (e) { /* niente memoria */ }
 })();
 </script>
 </body>
