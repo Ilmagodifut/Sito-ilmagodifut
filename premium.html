@@ -140,14 +140,6 @@
   .fm-codice-attivo[hidden] { display: none; }
   .fm-codice-spunta { color: var(--green); font-weight: 800; }
   .fm-codice-togli { margin-left: auto; background: none; border: 1px solid var(--border-dim); color: var(--text-muted); border-radius: 8px; padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .85rem; }
-  .fm-codice-modulo { display: grid; gap: .5rem; justify-items: center; }
-  .fm-codice-modulo[hidden] { display: none; }
-  .fm-codice-modulo label { color: var(--text-muted); font-size: .9rem; }
-  .fm-codice-riga { display: flex; gap: .5rem; width: 100%; max-width: 380px; }
-  .fm-codice-riga input { flex: 1; min-width: 0; padding: .7rem .9rem; border-radius: 8px; border: 1px solid #2f3b49; background: #12161d; color: #fff; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; }
-  .fm-codice-riga input:focus { outline: none; border-color: var(--green); }
-  .fm-codice-riga button { border: 1px solid var(--green); background: transparent; color: var(--green); border-radius: 8px; padding: .7rem 1.1rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
-  .fm-codice-errore { color: #ff8a8a; font-size: .88rem; margin: 0; }
 
   .piani-note { display: grid; gap: .9rem; margin-top: 1.4rem; }
   .piani-nota {
@@ -290,23 +282,16 @@
 
       <!-- ── IL CODICE CREATOR ───────────────────────────────────────────
            CHIESTO il 22/10/2026 (primo affiliato: ONLYONELY). Il codice
-           arriva dal link del creator (?codice=...) o si scrive qui; il
-           server dice di chi e' e quali sono i suoi due codici, uno per
-           piano, e il pagamento parte con quello giusto gia' inserito. -->
+           arriva SOLO dal link del creator (?codice=...): il titolare non
+           vuole una casella da riempire sulla pagina («non lo voglio il
+           riquadro»). Il server dice di chi e' e quali sono i suoi due
+           codici, uno per piano, e il pagamento parte con quello giusto. -->
       <div class="fm-codice" data-codice-box>
         <div class="fm-codice-attivo" data-codice-attivo hidden>
           <span class="fm-codice-spunta">✓</span>
           <span>Codice creator <b data-codice-nome></b> attivo: <b>Mensile 4,99 € il primo mese</b> e <b>Stagione FC 27 a 34,99 €</b>.</span>
           <button type="button" class="fm-codice-togli" data-codice-togli>Rimuovi</button>
         </div>
-        <form class="fm-codice-modulo" data-codice-modulo novalidate>
-          <label for="fm-codice-campo">Hai un codice creator?</label>
-          <div class="fm-codice-riga">
-            <input id="fm-codice-campo" data-codice-campo autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODICE" maxlength="24">
-            <button type="submit" data-codice-applica>Applica</button>
-          </div>
-          <p class="fm-codice-errore" data-codice-errore hidden></p>
-        </form>
       </div>
 
       <div class="piani-note">
@@ -570,9 +555,6 @@
   var box = document.querySelector('[data-codice-box]');
   if (!box) return;
   var attivo = box.querySelector('[data-codice-attivo]');
-  var modulo = box.querySelector('[data-codice-modulo]');
-  var campo = box.querySelector('[data-codice-campo]');
-  var errore = box.querySelector('[data-codice-errore]');
   var nome = box.querySelector('[data-codice-nome]');
   var tasti = { mese: document.querySelector('[data-paga-mese]'), pass: document.querySelector('[data-paga-stagione]') };
   var originali = { mese: null, pass: null };
@@ -606,7 +588,6 @@
       document.querySelector('[data-periodo-mese]').textContent = 'annulla quando vuoi';
     }
     attivo.hidden = !dati;
-    modulo.hidden = !!dati;
   }
   function ricorda(codice) {
     try {
@@ -614,33 +595,25 @@
       else localStorage.removeItem(MEMORIA);
     } catch (e) { /* senza memoria vale per questa visita */ }
   }
-  function prova(codice, silenzioso) {
+  function prova(codice) {
     codice = String(codice || '').trim().toUpperCase();
-    if (!/^[A-Z0-9]{3,24}$/.test(codice)) {
-      if (!silenzioso) { errore.textContent = 'Codice non valido.'; errore.hidden = false; }
-      return;
-    }
-    errore.hidden = true;
+    if (!/^[A-Z0-9]{3,24}$/.test(codice)) return;
     fetch(API + '/v1/creator/codice', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ codice: codice }) })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         if (r && r.ok) { ricorda(codice); mostra(r); return; }
-        if (!silenzioso) { errore.textContent = 'Questo codice non esiste.'; errore.hidden = false; }
-        else ricorda('');
+        ricorda('');
       })
-      .catch(function () {
-        if (!silenzioso) { errore.textContent = 'Non riesco a controllare il codice: riprova tra poco.'; errore.hidden = false; }
-      });
+      .catch(function () { /* server giu': si paga a prezzo pieno, come senza codice */ });
   }
 
-  modulo.addEventListener('submit', function (e) { e.preventDefault(); prova(campo.value, false); });
-  box.querySelector('[data-codice-togli]').addEventListener('click', function () { ricorda(''); mostra(null); campo.value = ''; });
+  box.querySelector('[data-codice-togli]').addEventListener('click', function () { ricorda(''); mostra(null); });
 
   var dalLink = (location.search.match(/[?&]codice=([^&]+)/) || [])[1];
-  if (dalLink) { prova(decodeURIComponent(dalLink), true); return; }
+  if (dalLink) { prova(decodeURIComponent(dalLink)); return; }
   try {
     var salvato = JSON.parse(localStorage.getItem(MEMORIA) || 'null');
-    if (salvato && salvato.codice && Date.now() - salvato.quando < TRENTA_GIORNI) prova(salvato.codice, true);
+    if (salvato && salvato.codice && Date.now() - salvato.quando < TRENTA_GIORNI) prova(salvato.codice);
   } catch (e) { /* niente memoria */ }
 })();
 </script>
