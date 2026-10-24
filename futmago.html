@@ -135,6 +135,9 @@
      guida si apre perche' l'hai chiesta, non perche' ci sei arrivato
      scorrendo. */
   .fm-guida.aperta { display: block; opacity: 1; transform: none; }
+  .fm-store { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.4rem; padding: 0.55rem 1rem; border: 1px solid var(--border, rgba(255,255,255,.15)); border-radius: 999px; color: var(--text); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+  .fm-store img { width: 22px; height: 22px; }
+  .fm-store:hover { border-color: var(--green); }
   .fm-avviso {
     border-left: 3px solid var(--green);
     background: rgba(57,255,20,0.05);
@@ -312,6 +315,7 @@
     <a class="btn-primary" href="#installa">Prova gratis</a>
     <a class="btn-secondary" href="/premium">Diventa Premium</a>
   </div>
+  <a class="fm-store" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener"><img src="/assets/loghi/chrome.svg" alt="" width="22" height="22">Disponibile sul Chrome Web Store</a>
 </section>
 
 <!-- ═══ INSTALLA ═══ -->
@@ -349,32 +353,23 @@
         <div class="step">
           <div class="step-num-wrap"><div class="step-num">1</div><div class="step-line"></div></div>
           <div class="step-body">
-            <h3>Scarica FUTMAGO</h3>
-            <p>Un file compresso da salvare sul computer. Scegli quello del tuo browser.</p>
+            <h3>Aggiungi FUTMAGO al browser</h3>
+            <p>Dal Chrome Web Store, con un clic. Funziona su Chrome, Edge, Brave e Opera, e si aggiorna da solo.</p>
             <p style="margin-top:0.9rem;">
-              <a class="btn-primary" href="/futmago-chrome.zip" download>Per Chrome, Edge, Brave, Opera</a>
-              <a class="btn-secondary" href="/futmago-firefox.zip" download style="margin-left:0.6rem;">Per Firefox</a>
+              <a class="btn-primary" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener">Aggiungi a Chrome</a>
             </p>
-            <p style="margin-top:0.9rem; font-size:0.82rem;">Poi estrai la cartella dal file e tienila dove non la cancellerai per sbaglio: l'estensione la legge da lì.</p>
+            <p style="margin-top:0.9rem; font-size:0.82rem;">Nella pagina dello store premi «Aggiungi a Chrome» e poi «Aggiungi estensione». Su Edge, se te lo chiede, premi prima «Consenti estensioni da altri store».</p>
           </div>
         </div>
         <div class="step">
           <div class="step-num-wrap"><div class="step-num">2</div><div class="step-line"></div></div>
-          <div class="step-body">
-            <h3>Caricala nel browser</h3>
-            <p><strong>Chrome, Edge, Brave, Opera:</strong> scrivi <code style="color:var(--green)">chrome://extensions</code> nella barra dell'indirizzo, accendi «Modalità sviluppatore» in alto a destra, premi «Carica estensione non pacchettizzata» e scegli la cartella estratta.</p>
-            <p style="margin-top:0.7rem;"><strong>Firefox:</strong> scrivi <code style="color:var(--green)">about:debugging#/runtime/this-firefox</code>, premi «Carica componente aggiuntivo temporaneo» e scegli il file <code>manifest.json</code> dentro la cartella.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num-wrap"><div class="step-num">3</div><div class="step-line"></div></div>
           <div class="step-body">
             <h3>Apri la Web App di EA</h3>
             <p>Vai su <a href="https://www.ea.com/ea-sports-fc/ultimate-team/web-app/" target="_blank" rel="noopener">ea.com/ea-sports-fc/ultimate-team/web-app</a> ed entra col tuo account, come fai sempre.</p>
           </div>
         </div>
         <div class="step">
-          <div class="step-num-wrap"><div class="step-num">4</div></div>
+          <div class="step-num-wrap"><div class="step-num">3</div></div>
           <div class="step-body">
             <h3>Controlla che sia attivo</h3>
             <p>Accanto al nome della schermata compare la scritta <strong>FUTMAGO</strong>, e nella barra di sinistra le voci <strong>ALBUM</strong> e <strong>FUTMAGO</strong>. Dentro una SBC trovi il tasto <strong>RISOLVI E COMPILA</strong>. Se non li vedi, ricarica la pagina.</p>
@@ -383,12 +378,13 @@
       </div>
 
       <div class="fm-avviso">
-        <strong>Perché questi passaggi a mano?</strong> FUTMAGO non è ancora sul Chrome Web Store:
-        quando sarà pubblicato basterà un clic, e l'estensione si aggiornerà da sola.
-        Nel file scaricato trovi anche le istruzioni, nel file «LEGGIMI».
+        <strong>Avevi installato FUTMAGO dal file zip?</strong> Aggiungilo dallo store, poi apri
+        <code style="color:var(--green)">chrome://extensions</code> e rimuovi la copia vecchia, quella con la scritta «Estensione non pacchettizzata».
+        Il tuo account e il Premium restano uguali: basta rientrare con la tua email.
         <br><br>
-        <strong>Su Firefox</strong> il caricamento temporaneo dura fino alla chiusura del browser:
-        va rifatto ogni volta. È una regola di Firefox per i componenti non firmati, non una nostra scelta.
+        <strong>Su Firefox</strong> FUTMAGO non è sullo store: <a href="/futmago-firefox.zip" download>scarica il file per Firefox</a>,
+        scrivi <code style="color:var(--green)">about:debugging#/runtime/this-firefox</code>, premi «Carica componente aggiuntivo temporaneo» e scegli il file <code>manifest.json</code> dentro la cartella.
+        Il caricamento dura fino alla chiusura del browser: è una regola di Firefox per i componenti non firmati, non una nostra scelta.
       </div>
     </div>
 
