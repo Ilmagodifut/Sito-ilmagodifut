@@ -1,5 +1,9 @@
 {
   "version": 1,
   "api": "https://futmago-licenza.futmago-api.workers.dev",
-  "versione": "0.7.14"
+  "versione": "0.7.15",
+  "negozi": {
+    "chrome": "https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin",
+    "firefox": "https://addons.mozilla.org/it/firefox/addon/futmago/"
+  }
 }

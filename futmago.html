@@ -137,6 +137,14 @@
   .fm-guida.aperta { display: block; opacity: 1; transform: none; }
   .fm-store { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.4rem; padding: 0.55rem 1rem; border: 1px solid var(--border, rgba(255,255,255,.15)); border-radius: 999px; color: var(--text); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
   .fm-store img { width: 22px; height: 22px; }
+  .fm-altro { margin-top: 0.8rem; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 0 1.1rem; }
+  .fm-altro summary { cursor: pointer; list-style: none; padding: 1rem 0; font-weight: 700; font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; }
+  .fm-altro summary::-webkit-details-marker { display: none; }
+  .fm-altro summary::after { content: "›"; color: var(--green); font-size: 1.6rem; line-height: 1; transition: transform .2s; }
+  .fm-altro[open] summary::after { transform: rotate(90deg); }
+  .fm-altro[open] { padding-bottom: 1rem; }
+  .fm-negozi { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+  .fm-negozi .fm-store { margin-top: 1.4rem; }
   .fm-store:hover { border-color: var(--green); }
   .fm-avviso {
     border-left: 3px solid var(--green);
@@ -315,7 +323,7 @@
     <a class="btn-primary" href="#installa">Prova gratis</a>
     <a class="btn-secondary" href="/premium">Diventa Premium</a>
   </div>
-  <a class="fm-store" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener"><img src="/assets/loghi/chrome.svg" alt="" width="22" height="22">Disponibile sul Chrome Web Store</a>
+  <div class="fm-negozi"><a class="fm-store" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener"><img src="/assets/loghi/chrome.svg" alt="" width="22" height="22">Disponibile sul Chrome Web Store</a><a class="fm-store" href="https://addons.mozilla.org/it/firefox/addon/futmago/" target="_blank" rel="noopener"><img src="/assets/loghi/firefox.svg" alt="" width="22" height="22">Disponibile per Firefox</a></div>
 </section>
 
 <!-- ═══ INSTALLA ═══ -->
@@ -354,9 +362,10 @@
           <div class="step-num-wrap"><div class="step-num">1</div><div class="step-line"></div></div>
           <div class="step-body">
             <h3>Aggiungi FUTMAGO al browser</h3>
-            <p>Dal Chrome Web Store, con un clic. Funziona su Chrome, Edge, Brave e Opera, e si aggiorna da solo.</p>
-            <p style="margin-top:0.9rem;">
-              <a class="btn-primary" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener">Aggiungi a Chrome</a>
+            <p>Dallo store ufficiale, con un clic, e si aggiorna da solo. Chrome Web Store per Chrome, Edge, Brave e Opera; Firefox ha il suo.</p>
+            <p style="margin-top:0.9rem; display:flex; flex-wrap:wrap; gap:0.6rem;">
+              <a class="btn-primary" href="https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.6rem;"><img src="/assets/loghi/chrome.svg" alt="" width="22" height="22" style="background:#fff;border-radius:50%;padding:2px;">Aggiungi a Chrome</a>
+              <a class="btn-secondary" href="https://addons.mozilla.org/it/firefox/addon/futmago/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.6rem;"><img src="/assets/loghi/firefox.svg" alt="" width="22" height="22" style="background:#fff;border-radius:50%;padding:2px;">Aggiungi a Firefox</a>
             </p>
             <p style="margin-top:0.9rem; font-size:0.82rem;">Nella pagina dello store premi «Aggiungi a Chrome» e poi «Aggiungi estensione». Su Edge, se te lo chiede, premi prima «Consenti estensioni da altri store».</p>
           </div>
@@ -382,9 +391,8 @@
         <code style="color:var(--green)">chrome://extensions</code> e rimuovi la copia vecchia, quella con la scritta «Estensione non pacchettizzata».
         Il tuo account e il Premium restano uguali: basta rientrare con la tua email.
         <br><br>
-        <strong>Su Firefox</strong> FUTMAGO non è sullo store: <a href="/futmago-firefox.zip" download style="color:var(--green);">scarica il file per Firefox</a>,
-        scrivi <code style="color:var(--green)">about:debugging#/runtime/this-firefox</code>, premi «Carica componente aggiuntivo temporaneo» e scegli il file <code>manifest.json</code> dentro la cartella.
-        Il caricamento dura fino alla chiusura del browser: è una regola di Firefox per i componenti non firmati, non una nostra scelta.
+        <strong>Su Firefox</strong> lo stesso: aggiungilo dalla <a href="https://addons.mozilla.org/it/firefox/addon/futmago/" target="_blank" rel="noopener" style="color:var(--green);">pagina di FUTMAGO per Firefox</a>,
+        poi apri <code style="color:var(--green)">about:addons</code> e rimuovi la copia caricata a mano.
       </div>
     </div>
 
@@ -453,7 +461,7 @@
           <div class="step-body">
             <h3>Copia il codice</h3>
             <p>Premi COPIA: è l'indirizzo del segnalibro.</p>
-            <code class="fm-codice" id="fm-bookmarklet">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.7.14-cde023fd').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
+            <code class="fm-codice" id="fm-bookmarklet">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.7.15-0255b1cd').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
             <button class="fm-copia" data-copia="fm-bookmarklet">Copia</button>
           </div>
         </div>
@@ -484,7 +492,7 @@
     <!-- ── ANDROID ── -->
     <div class="fm-guida" id="guida-android">
       <h2 class="section-title" style="font-size:1.8rem; margin-top:1rem;">Android</h2>
-      <p class="section-desc">La strada più semplice è l'<strong>app FUTMAGO</strong>: dentro c'è già la Web App di EA con FUTMAGO acceso, e non devi preparare nient'altro. In alternativa puoi usare Firefox o il segnalibro di Chrome.</p>
+      <p class="section-desc">La strada più semplice è l'<strong>app FUTMAGO</strong>: dentro c'è già la Web App di EA con FUTMAGO acceso, e non devi preparare nient'altro. Più in basso trovi anche come installarlo a mano.</p>
 
       <h3 style="margin-top:2.5rem; font-size:1.15rem;">L'app FUTMAGO — consigliata</h3>
 
@@ -515,7 +523,8 @@
         </div>
       </div>
 
-      <h3 style="margin-top:3rem; font-size:1.15rem;">Con Firefox</h3>
+      <p style="margin-top:3rem; font-size:0.95rem; color:var(--text-muted, #9aa);">Oppure installa FUTMAGO a mano:</p>
+      <details class="fm-altro"><summary>Con Firefox</summary>
 
       <div class="steps" style="margin-top:1.5rem;">
         <div class="step">
@@ -553,7 +562,8 @@
         </div>
       </div>
 
-      <h3 style="margin-top:3rem; font-size:1.15rem;">Con Chrome — il segnalibro</h3>
+      </details>
+      <details class="fm-altro"><summary>Con Chrome — il segnalibro</summary>
       <p class="section-desc" style="margin-top:0.6rem;">Chrome su Android non accetta estensioni: nessuna, non solo la nostra. Resta il segnalibro, che va premuto ogni volta che apri la Web App.</p>
 
       <div class="steps" style="margin-top:1.5rem;">
@@ -561,7 +571,7 @@
           <div class="step-num-wrap"><div class="step-num">A</div><div class="step-line"></div></div>
           <div class="step-body">
             <h3>Copia il codice</h3>
-            <code class="fm-codice" id="fm-bookmarklet-android">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.7.14-cde023fd').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
+            <code class="fm-codice" id="fm-bookmarklet-android">javascript:(function(){fetch('https://ilmagodifut.com/futmago.js?v=0.7.15-0255b1cd').then(function(r){return r.text()}).then(eval).catch(function(e){alert('FUTMAGO: '+e)})})()</code>
             <button class="fm-copia" data-copia="fm-bookmarklet-android">Copia</button>
           </div>
         </div>
@@ -580,6 +590,7 @@
           </div>
         </div>
       </div>
+      </details>
 
       </div>
     </div>
