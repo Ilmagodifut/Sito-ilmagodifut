@@ -620,6 +620,8 @@
   var dalLink = (location.search.match(/[?&]codice=([^&]+)/) || [])[1];
   if (dalLink) {
     /* Dal link del creator: si conta la visita e si va alla pagina di FUTMAGO (anche se il server non risponde). */
+    /* La fascia del codice su /futmago si vede solo in questa visita dal link, non a chi torna da solo. */
+    try { sessionStorage.setItem('fm.daCreator', '1'); } catch (e) {}
     var via = function () { location.replace('/futmago'); };
     setTimeout(via, 2500);
     prova(decodeURIComponent(dalLink), '/v1/creator/visita').then(via, via);

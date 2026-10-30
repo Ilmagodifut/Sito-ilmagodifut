@@ -806,9 +806,9 @@
   try {
     var s = JSON.parse(localStorage.getItem('fm.codiceCreator') || 'null');
     if (!s || !s.codice || Date.now() - s.quando > 30 * 24 * 60 * 60 * 1000) return;
-    if (sessionStorage.getItem('fm.creatorChiuso') === '1') return;
+    if (sessionStorage.getItem('fm.daCreator') !== '1' || sessionStorage.getItem('fm.creatorChiuso') === '1') return;
     var f = document.querySelector('[data-fm-creator]');
-    f.querySelector('[data-fm-creator-nome]').textContent = s.nome || s.codice;
+    f.querySelector('[data-fm-creator-nome]').textContent = String(s.nome || '').trim() || s.codice;
     f.hidden = false;
     f.querySelector('[data-fm-creator-chiudi]').addEventListener('click', function () {
       f.hidden = true;
