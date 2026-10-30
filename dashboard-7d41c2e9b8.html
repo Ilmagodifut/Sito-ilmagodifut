@@ -336,6 +336,8 @@
       <section style="--i:2" class="box tessera c3"><div class="etichetta">Incassato con i codici</div><div class="riga-num"><div class="numero attesa" id="cr-incassato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">Quanto hanno pagato i clienti</div></section>
       <section style="--i:3" class="box tessera c3"><div class="etichetta">Commissioni maturate</div><div class="riga-num"><div class="numero attesa" id="cr-maturato">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio">2 € Mensile · 5 € Season, solo la prima vendita</div></section>
       <section style="--i:4" class="box tessera c3"><div class="etichetta">Da pagare ai creator</div><div class="riga-num"><div class="numero attesa" id="cr-dapagare">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="cr-dapagare-d">&nbsp;</div></section>
+      <section style="--i:4" class="box tessera c6"><div class="etichetta">Visite ai link dei creator</div><div class="riga-num"><div class="numero attesa" id="cr-visite">—</div></div><div class="dettaglio">Una al giorno per connessione · dal 30/10</div></section>
+      <section style="--i:4" class="box tessera c6"><div class="etichetta">Iscritti dai link dei creator</div><div class="riga-num"><div class="numero attesa" id="cr-iscritti">—</div></div><div class="dettaglio" id="cr-iscritti-d">Nuovi account entro 30 giorni dal link</div></section>
 
       <section style="--i:5" class="box c12">
         <h2>I creator</h2>
@@ -737,6 +739,8 @@
     mostraNumero('cr-incassato', tot('incassato'), euroIntero);
     mostraNumero('cr-maturato', tot('maturato'), euroIntero);
     mostraNumero('cr-dapagare', tot('daPagare'), euroIntero);
+    mostraNumero('cr-visite', lista.reduce(function (t, c) { return t + (c.visite || 0); }, 0), numeroIntero);
+    mostraNumero('cr-iscritti', lista.reduce(function (t, c) { return t + (c.iscritti || []).length; }, 0), numeroIntero);
     $('cr-dapagare-d').textContent = euro(tot('pagato')) + ' già pagati';
     var perGiorno = {};
     for (var i = 0; i < giorni; i++) { var g = new Date(Date.now() - i * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); perGiorno[g] = { giorno: g, mese: 0, pass: 0 }; }
