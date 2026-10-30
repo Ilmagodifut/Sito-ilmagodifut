@@ -547,6 +547,11 @@
  *
  * Il codice si ricorda per 30 giorni: chi arriva dal link del creator e paga
  * il giorno dopo deve avere lo stesso sconto (e il creator la sua vendita).
+ *
+ * CHIESTO il 30/10/2026: il link del creator (?codice=) porta alla pagina di
+ * FUTMAGO, non qui: la visita si conta, il codice si ricorda e si va su
+ * /futmago. Chi poi arriva qui da FUTMAGO (#rif) senza codice in memoria lo
+ * ritrova dal suo account, se e' arrivato da un creator negli ultimi 30 giorni.
  * Si aggiunge ai due tasti come `prefilled_promo_code`: Stripe lo applica da
  * solo, e il codice di un piano sull'altro Stripe lo rifiuta comunque.
  */
@@ -591,32 +596,48 @@
     }
     attivo.hidden = !dati;
   }
-  function ricorda(codice) {
+  function ricorda(codice, chi) {
     try {
-      if (codice) localStorage.setItem(MEMORIA, JSON.stringify({ codice: codice, quando: Date.now() }));
+      if (codice) localStorage.setItem(MEMORIA, JSON.stringify({ codice: codice, nome: chi || codice, quando: Date.now() }));
       else localStorage.removeItem(MEMORIA);
     } catch (e) { /* senza memoria vale per questa visita */ }
   }
-  function prova(codice) {
+  function prova(codice, percorso) {
     codice = String(codice || '').trim().toUpperCase();
-    if (!/^[A-Z0-9]{3,24}$/.test(codice)) return;
-    fetch(API + '/v1/creator/codice', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ codice: codice }) })
+    if (!/^[A-Z0-9]{3,24}$/.test(codice)) return Promise.resolve(null);
+    return fetch(API + (percorso || '/v1/creator/codice'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ codice: codice }) })
       .then(function (r) { return r.json(); })
       .then(function (r) {
-        if (r && r.ok) { ricorda(codice); mostra(r); return; }
+        if (r && r.ok) { ricorda(codice, r.nome); mostra(r); return r; }
         ricorda('');
+        return null;
       })
-      .catch(function () { /* server giu': si paga a prezzo pieno, come senza codice */ });
+      .catch(function () { return null; /* server giu': si paga a prezzo pieno, come senza codice */ });
   }
 
   box.querySelector('[data-codice-togli]').addEventListener('click', function () { ricorda(''); mostra(null); });
 
   var dalLink = (location.search.match(/[?&]codice=([^&]+)/) || [])[1];
-  if (dalLink) { prova(decodeURIComponent(dalLink)); return; }
+  if (dalLink) {
+    /* Dal link del creator: si conta la visita e si va alla pagina di FUTMAGO (anche se il server non risponde). */
+    var via = function () { location.replace('/futmago'); };
+    setTimeout(via, 2500);
+    prova(decodeURIComponent(dalLink), '/v1/creator/visita').then(via, via);
+    return;
+  }
   try {
     var salvato = JSON.parse(localStorage.getItem(MEMORIA) || 'null');
-    if (salvato && salvato.codice && Date.now() - salvato.quando < TRENTA_GIORNI) prova(salvato.codice);
+    if (salvato && salvato.codice && Date.now() - salvato.quando < TRENTA_GIORNI) { prova(salvato.codice); return; }
   } catch (e) { /* niente memoria */ }
+  /* Aperta da FUTMAGO senza codice in memoria: l'account e' arrivato da un creator? */
+  var h = {};
+  location.hash.replace(/^#/, '').split('&').forEach(function (c) { var i = c.indexOf('='); if (i > 0) h[c.slice(0, i)] = decodeURIComponent(c.slice(i + 1)); });
+  if (h.rif && h.email) {
+    fetch(API + '/v1/creator/mio', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: h.email, rif: h.rif }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) { if (r && r.ok) { ricorda(r.mese, r.nome); mostra(r); } })
+      .catch(function () {});
+  }
 })();
 </script>
 </body>

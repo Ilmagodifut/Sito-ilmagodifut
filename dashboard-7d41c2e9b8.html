@@ -745,8 +745,8 @@
     colonneNelTempo('g-creator-giorni', righe, [{ chiave: 'mese', nome: 'Mensile', colore: 'var(--s1)' }, { chiave: 'pass', nome: 'Season Pass', colore: 'var(--s3)' }], numero);
     scintilla('cr-vendite', righe.slice(-14).map(function (r) { return r.mese + r.pass; }));
     barreCategorie('g-creator-comm', lista.map(function (c) { return { nome: c.nome, n: c.maturato }; }), [{ chiave: 'n', nome: 'Maturate', colore: 'var(--s2)' }], euroCorto);
-    tabella('tab-creator', ['Creator', 'Codici', 'Mensile', 'Season', 'Incassato', 'Maturato', 'Pagato', 'Da pagare', 'Dal'], lista.map(function (c) {
-      return [c.nome, c.codiceMese + ' · ' + c.codicePass, numero(c.mese), numero(c.pass), euro(c.incassato), euro(c.maturato), euro(c.pagato), euro(c.daPagare), data(c.creatoIl)];
+    tabella('tab-creator', ['Creator', 'Codici', 'Visite', 'Iscritti', 'Mensile', 'Season', 'Incassato', 'Maturato', 'Pagato', 'Da pagare', 'Dal'], lista.map(function (c) {
+      return [c.nome, c.codiceMese + ' · ' + c.codicePass, numero(c.visite || 0), numero((c.iscritti || []).length), numero(c.mese), numero(c.pass), euro(c.incassato), euro(c.maturato), euro(c.pagato), euro(c.daPagare), data(c.creatoIl)];
     }), [0, 1]);
     tutte.sort(function (a, b) { return b.v.q - a.v.q; });
     tabella('tab-creator-vendite', ['Data', 'Creator', 'Piano', 'Cliente', 'Pagato', 'Commissione', ''], tutte.slice(0, 100).map(function (x) {
