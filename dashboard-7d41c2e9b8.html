@@ -17,7 +17,7 @@
   collegato da nessuna pagina. La protezione e' la ADMIN_SECRET: il server
   rifiuta tutto senza, e dopo 10 chiavi sbagliate in un'ora blocca la rete.
 
-  Dati     POST /v1/cruscotto { parte: giorni|conti|uso|elite|incassi|utente, giorni, email }
+  Dati     POST /v1/cruscotto { parte: giorni|conti|uso|elite|incassi|rinnovi|utente, giorni, email }
   Azioni   le stesse dell'Assistenza: /v1/regalo, /v1/sposta, /v1/sblocca-cambi, e /elite/giro
 -->
 <style>
@@ -173,6 +173,7 @@
     <button type="button" role="tab" aria-selected="false" data-vista="futmago">FUTMAGO</button>
     <button type="button" role="tab" aria-selected="false" data-vista="elite">Elite</button>
     <button type="button" role="tab" aria-selected="false" data-vista="incassi">Incassi</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="rinnovi">Rinnovi</button>
     <button type="button" role="tab" aria-selected="false" data-vista="creator">Creator</button>
     <button type="button" role="tab" aria-selected="false" data-vista="assistenza">Utenti e assistenza</button>
   </nav>
@@ -288,6 +289,32 @@
       <section style="--i:9" class="box c12">
         <div class="riga-titolo"><h2>Tutti gli abbonati dal sito</h2><input type="search" id="filtro-elite" placeholder="Cerca email o @username" aria-label="Cerca fra gli abbonati Elite"></div>
         <div class="tabella-wrap tabella-alta" id="tab-elite" style="margin-top:10px"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ RINNOVI (chiesti il 03/11/2026) ═══ -->
+  <div class="vista" id="vista-rinnovi">
+    <div class="griglia">
+      <section style="--i:1" class="box c12" id="avviso-rinnovi" hidden><div class="avviso" id="avviso-rinnovi-testo"></div></section>
+      <section style="--i:2" class="box c12">
+        <div class="riga-titolo"><h2>Rinnovi automatici</h2><span class="sotto" style="margin:0" id="rn-primo"></span></div>
+        <p class="sotto">FUTMAGO Premium ed Elite. Previsti = andati a buon fine + rinnovo tolto + pagamento non riuscito. Un pagamento rifiutato e ritentato lo stesso giorno conta una volta.</p>
+        <div class="tabella-wrap" id="tab-rinnovi-periodi"></div>
+      </section>
+      <section style="--i:3" class="box c6">
+        <h2>Pagamenti non riusciti</h2>
+        <p class="sotto">Il motivo è quello dato dalla banca. Stripe ritenta da solo nei giorni seguenti.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-rinnovi-falliti"></div>
+      </section>
+      <section style="--i:4" class="box c6">
+        <h2>In arrivo nei prossimi 7 giorni</h2>
+        <p class="sotto">Abbonamenti attivi col rinnovo automatico acceso.</p>
+        <div class="tabella-wrap" id="tab-rinnovi-prossimi"></div>
+      </section>
+      <section style="--i:5" class="box c12">
+        <h2>Ultimi 30 giorni, uno per uno</h2>
+        <div class="tabella-wrap tabella-alta" id="tab-rinnovi-elenco"></div>
       </section>
     </div>
   </div>
@@ -892,6 +919,31 @@
       }), [0, 1, 2]);
       disegnaElenco();
     }
+    if (dati.rinnovi) {
+      var rn = dati.rinnovi;
+      if (!rn.disponibile) {
+        $('avviso-rinnovi').hidden = false;
+        $('avviso-rinnovi-testo').textContent = rn.motivo === 'manca-chiave' ? 'Stripe non collegato: serve la chiave in sola lettura sul server.' : 'Stripe non risponde: ' + (rn.motivo || '');
+      } else {
+        $('avviso-rinnovi').hidden = true;
+        $('rn-primo').textContent = rn.primoFutmago ? 'Primo abbonamento FUTMAGO: ' + data(rn.primoFutmago) : '';
+        var SERV = { futmago: 'FUTMAGO', elite: 'Elite' };
+        var ESITO = { riuscito: '✅ Rinnovato', fallito: '❌ Non riuscito', disdetto: '🚫 Rinnovo tolto' };
+        tabella('tab-rinnovi-periodi', ['Periodo', 'Previsti', 'Riusciti', 'Rinnovo tolto', 'Non riusciti'], [
+          ['Oggi', rn.oggi], ['Ultimi 7 giorni', rn.settimana], ['Ultimi 30 giorni', rn.mese]
+        ].map(function (x) { return [x[0], numero(x[1].previsti), numero(x[1].riusciti), numero(x[1].disdetti), numero(x[1].falliti)]; }), [0]);
+        var orario = function (ms) { return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+        tabella('tab-rinnovi-falliti', ['Quando', 'Servizio', 'Cliente', 'Motivo'], rn.elenco.filter(function (x) { return x.esito === 'fallito'; }).map(function (x) {
+          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', x.motivo || '—'];
+        }), [0, 1, 2, 3]);
+        tabella('tab-rinnovi-prossimi', ['Giorno', 'FUTMAGO', 'Elite'], rn.prossimi.map(function (g) {
+          return [new Date(g.giorno + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' }), numero(g.futmago), numero(g.elite)];
+        }), [0]);
+        tabella('tab-rinnovi-elenco', ['Quando', 'Servizio', 'Cliente', 'Esito', 'Importo'], rn.elenco.map(function (x) {
+          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', ESITO[x.esito] + (x.motivo ? ' · ' + x.motivo : ''), x.importo ? euro(x.importo) : '—'];
+        }), [0, 1, 2, 3]);
+      }
+    }
     if (dati.incassi) {
       var inc = dati.incassi;
       if (!inc.disponibile) {
@@ -994,6 +1046,7 @@
       ['uso', function (r) { dati.uso = r.uso; }],
       ['elite', function (r) { dati.elite = r.elite; }],
       ['incassi', function (r) { dati.incassi = r.incassi; }],
+      ['rinnovi', function (r) { dati.rinnovi = r.rinnovi; }],
       ['conti', function (r) { dati.conti = r.conti; }],
       ['creator', function (r) { dati.creator = r.creator; }]
     ];
