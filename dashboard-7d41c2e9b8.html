@@ -265,14 +265,10 @@
   <div class="vista" id="vista-magomarket">
     <div class="griglia">
       <section style="--i:1" class="box c12">
-        <form onsubmit="return false" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <input type="text" name="username" autocomplete="username" value="admin-magomarket" style="display:none">
-          <label class="nascosto" for="chiave-mm">Chiave admin di MAGOMARKET</label>
-          <input type="password" id="chiave-mm" name="password" autocomplete="current-password" placeholder="Chiave admin di MAGOMARKET" size="28">
-          <button type="button" id="carica-mm">Carica MAGOMARKET</button>
-        </form>
+        <!-- 12/11/2026 «accesso unico»: niente seconda chiave, basta quella in alto
+             (il server di MAGOMARKET la verifica chiedendo a futmago-licenza). -->
         <div class="esito" id="mm-esito"></div>
-        <p class="sotto" style="margin-top:8px">MAGOMARKET ha account suoi, separati da FUTMAGO. Giri, utenti e Free al limite si contano dal 12/11/2026.</p>
+        <p class="sotto" style="margin-top:8px">MAGOMARKET ha account suoi, separati da FUTMAGO. I numeri arrivano con la stessa chiave in alto e «Aggiorna tutto». Giri, utenti e Free al limite si contano dal 12/11/2026.</p>
       </section>
       <section style="--i:2" class="box tessera c3"><div class="etichetta">Account MAGOMARKET</div><div class="riga-num"><div class="numero attesa" id="mm-conti">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-conti-d">&nbsp;</div></section>
       <section style="--i:3" class="box tessera c3"><div class="etichetta">Utenti oggi</div><div class="riga-num"><div class="numero attesa" id="mm-oggi">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-oggi-d">&nbsp;</div></section>
@@ -1087,23 +1083,21 @@
   }
 
   // ── caricamento ─────────────────────────────────────────────────────────
-  // ── MAGOMARKET (server suo, chiave sua) ────────────────────────────────
+  // ── MAGOMARKET (server suo, stessa chiave della Dashboard) ────────────────────────────────
   var API_MM = 'https://magomarket-licenza.futmago-api.workers.dev';
   var datiMM = null;
   function caricaMM() {
-    var k = $('chiave-mm').value.trim();
-    if (k === '') { mostra('mm-esito', false, 'Scrivi la chiave admin di MAGOMARKET.'); return; }
-    $('carica-mm').disabled = true;
+    var k = chiave();
+    if (k === '') { mostra('mm-esito', false, 'Scrivi prima la tua chiave in alto.'); return; }
     fetch(API_MM + '/v1/admin/dashboard', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin': k }, body: JSON.stringify({ giorni: 90 }) })
       .then(function (r) { return r.json(); })
       .then(function (r) {
-        if (!r || !r.ok) throw new Error(r && r.errore === 'chiave' ? 'Chiave di MAGOMARKET sbagliata.' : 'Il server di MAGOMARKET non ha risposto.');
+        if (!r || !r.ok) throw new Error(r && r.errore === 'chiave' ? 'Chiave sbagliata: è quella in alto.' : 'Il server di MAGOMARKET non ha risposto.');
         datiMM = r; animaProssimo = true;
         mostra('mm-esito', true, 'Dati di MAGOMARKET aggiornati alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }));
         disegnaMM();
       })
-      .catch(function (e) { mostra('mm-esito', false, e.message); })
-      .then(function () { $('carica-mm').disabled = false; });
+      .catch(function (e) { mostra('mm-esito', false, e.message); });
   }
   function disegnaMM() {
     if (!datiMM) return;
@@ -1130,11 +1124,10 @@
       return [u.email, data(u.creatoIl), u.piano === 'pro' ? 'PRO' : 'Free', u.proFino ? data(u.proFino) : '—', numero(u.dispositivi)];
     }), [0]);
   }
-  $('carica-mm').addEventListener('click', caricaMM);
 
   function aggiornaTutto() {
-    /* Anche MAGOMARKET, se la sua chiave e' scritta (il browser la ricorda come password). */
-    if ($('chiave-mm').value.trim() !== '') caricaMM();
+    /* Anche MAGOMARKET, con la stessa chiave (accesso unico, 12/11/2026). */
+    if (chiave() !== '') caricaMM();
     if (chiave() === '') { $('stato-generale').textContent = 'Scrivi prima la tua chiave in alto.'; return; }
     var b = $('aggiorna'); b.disabled = true; b.classList.add('gira');
     animaProssimo = true;
