@@ -171,6 +171,7 @@
   <nav class="schede" role="tablist">
     <button type="button" role="tab" aria-selected="true" data-vista="panoramica">Panoramica</button>
     <button type="button" role="tab" aria-selected="false" data-vista="futmago">FUTMAGO</button>
+    <button type="button" role="tab" aria-selected="false" data-vista="magomarket">MAGOMARKET</button>
     <button type="button" role="tab" aria-selected="false" data-vista="elite">Elite</button>
     <button type="button" role="tab" aria-selected="false" data-vista="incassi">Incassi</button>
     <button type="button" role="tab" aria-selected="false" data-vista="rinnovi">Rinnovi</button>
@@ -253,6 +254,55 @@
         <h2>Ultimi account creati</h2>
         <p class="sotto">I 20 più recenti, col piano di adesso.</p>
         <div class="tabella-wrap tabella-alta" id="tab-ultimi"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══ MAGOMARKET ═══ (CHIESTO il 12/11/2026: «una pagina dedicata a MAGOMARKET così abbiamo tutti i dati»)
+       I dati stanno sul server di MAGOMARKET (magomarket-licenza), separato da FUTMAGO:
+       servono la sua chiave admin (Desktop › MAGOMARKET-chiavi › LEGGIMI.txt) e
+       POST /v1/admin/dashboard { giorni }. Giri, utenti e Free al limite si contano dal 12/11/2026. -->
+  <div class="vista" id="vista-magomarket">
+    <div class="griglia">
+      <section style="--i:1" class="box c12">
+        <form onsubmit="return false" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input type="text" name="username" autocomplete="username" value="admin-magomarket" style="display:none">
+          <label class="nascosto" for="chiave-mm">Chiave admin di MAGOMARKET</label>
+          <input type="password" id="chiave-mm" name="password" autocomplete="current-password" placeholder="Chiave admin di MAGOMARKET" size="28">
+          <button type="button" id="carica-mm">Carica MAGOMARKET</button>
+        </form>
+        <div class="esito" id="mm-esito"></div>
+        <p class="sotto" style="margin-top:8px">MAGOMARKET ha account suoi, separati da FUTMAGO. Giri, utenti e Free al limite si contano dal 12/11/2026.</p>
+      </section>
+      <section style="--i:2" class="box tessera c3"><div class="etichetta">Account MAGOMARKET</div><div class="riga-num"><div class="numero attesa" id="mm-conti">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-conti-d">&nbsp;</div></section>
+      <section style="--i:3" class="box tessera c3"><div class="etichetta">Utenti oggi</div><div class="riga-num"><div class="numero attesa" id="mm-oggi">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-oggi-d">&nbsp;</div></section>
+      <section style="--i:4" class="box tessera c3"><div class="etichetta">Giri oggi</div><div class="riga-num"><div class="numero attesa" id="mm-giri">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-giri-d">&nbsp;</div></section>
+      <section style="--i:5" class="box tessera c3"><div class="etichetta">Free al limite (periodo)</div><div class="riga-num"><div class="numero attesa" id="mm-limite">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="mm-limite-d">&nbsp;</div></section>
+
+      <section style="--i:6" class="box c8">
+        <div class="riga-titolo"><h2>Utenti al giorno</h2><button class="link-tabella" data-tabella="g-mm-attivi">Vedi tabella</button></div>
+        <p class="sotto">Account che hanno fatto almeno un giro, ora italiana.</p>
+        <div class="grafico" id="g-mm-attivi"></div>
+      </section>
+      <section style="--i:7" class="box c4">
+        <div class="riga-titolo"><h2>Account per piano</h2><button class="link-tabella" data-tabella="g-mm-piani">Vedi tabella</button></div>
+        <p class="sotto">Tutti gli account di MAGOMARKET, adesso.</p>
+        <div class="grafico" id="g-mm-piani"></div>
+      </section>
+      <section style="--i:8" class="box c6">
+        <div class="riga-titolo"><h2>Giri al giorno</h2><button class="link-tabella" data-tabella="g-mm-giri">Vedi tabella</button></div>
+        <p class="sotto">Giri partiti, e Free che hanno trovato il giro del giorno già usato.</p>
+        <div class="grafico" id="g-mm-giri"></div>
+      </section>
+      <section style="--i:9" class="box c6">
+        <div class="riga-titolo"><h2>Nuovi account e codici</h2><button class="link-tabella" data-tabella="g-mm-nuovi">Vedi tabella</button></div>
+        <p class="sotto">Account creati e codici di accesso spediti per email, ogni giorno.</p>
+        <div class="grafico" id="g-mm-nuovi"></div>
+      </section>
+      <section style="--i:10" class="box c12">
+        <div class="riga-titolo"><h2>Ultimi iscritti</h2></div>
+        <p class="sotto">Gli ultimi 50 account di MAGOMARKET.</p>
+        <div id="mm-ultimi"></div>
       </section>
     </div>
   </div>
@@ -836,6 +886,7 @@
   });
 
   function disegna() {
+    if (typeof disegnaMM === 'function') disegnaMM();
     disegnaPaypal();
     disegnaCreator();
     document.querySelectorAll('.link-tabella').forEach(function (b) { b.setAttribute('data-aperta', '0'); b.textContent = 'Vedi tabella'; });
@@ -1036,7 +1087,54 @@
   }
 
   // ── caricamento ─────────────────────────────────────────────────────────
+  // ── MAGOMARKET (server suo, chiave sua) ────────────────────────────────
+  var API_MM = 'https://magomarket-licenza.futmago-api.workers.dev';
+  var datiMM = null;
+  function caricaMM() {
+    var k = $('chiave-mm').value.trim();
+    if (k === '') { mostra('mm-esito', false, 'Scrivi la chiave admin di MAGOMARKET.'); return; }
+    $('carica-mm').disabled = true;
+    fetch(API_MM + '/v1/admin/dashboard', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin': k }, body: JSON.stringify({ giorni: 90 }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r || !r.ok) throw new Error(r && r.errore === 'chiave' ? 'Chiave di MAGOMARKET sbagliata.' : 'Il server di MAGOMARKET non ha risposto.');
+        datiMM = r; animaProssimo = true;
+        mostra('mm-esito', true, 'Dati di MAGOMARKET aggiornati alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }));
+        disegnaMM();
+      })
+      .catch(function (e) { mostra('mm-esito', false, e.message); })
+      .then(function () { $('carica-mm').disabled = false; });
+  }
+  function disegnaMM() {
+    if (!datiMM) return;
+    var PRO = { chiave: 'pro', nome: 'PRO', colore: 'var(--s1)' };
+    var FREE = { chiave: 'free', nome: 'Free', colore: 'var(--s2)' };
+    var c = datiMM.conti, g = datiMM.giorni.slice(0, giorni).slice().reverse(), oggi = datiMM.giorni[0] || {};
+    mostraNumero('mm-conti', c.totale, numeroIntero);
+    $('mm-conti-d').textContent = numero(c.pro) + ' PRO · ' + numero(c.free) + ' Free · ' + numero(c.nuovi7) + ' nuovi in 7 giorni';
+    scintilla('mm-conti', datiMM.giorni.slice(0, 14).map(function (x) { return x.nuovi; }).reverse());
+    mostraNumero('mm-oggi', oggi.totale || 0, numeroIntero);
+    $('mm-oggi-d').textContent = numero(oggi.pro) + ' PRO · ' + numero(oggi.free) + ' Free';
+    scintilla('mm-oggi', datiMM.giorni.slice(0, 14).map(function (x) { return x.totale; }).reverse());
+    mostraNumero('mm-giri', oggi.giri || 0, numeroIntero);
+    $('mm-giri-d').textContent = numero(c.dispositivi) + ' dispositivi collegati';
+    scintilla('mm-giri', datiMM.giorni.slice(0, 14).map(function (x) { return x.giri; }).reverse());
+    var limite = 0; datiMM.giorni.slice(0, giorni).forEach(function (x) { limite += x.limite; });
+    mostraNumero('mm-limite', limite, numeroIntero);
+    $('mm-limite-d').textContent = 'Free che volevano un altro giro: lì PRO serve davvero';
+    colonneNelTempo('g-mm-attivi', g, [PRO, FREE], numero);
+    barreCategorie('g-mm-piani', [{ nome: 'PRO', n: c.pro }, { nome: 'di cui regalati', n: c.proRegalati }, { nome: 'Free', n: c.free }], [{ chiave: 'n', nome: 'Account', colore: 'var(--s1)' }], numero);
+    colonneNelTempo('g-mm-giri', g, [{ chiave: 'giri', nome: 'Giri', colore: 'var(--s1)' }, { chiave: 'limite', nome: 'Free al limite', colore: 'var(--s2)' }], numero);
+    colonneNelTempo('g-mm-nuovi', g, [{ chiave: 'nuovi', nome: 'Nuovi account', colore: 'var(--s1)' }, { chiave: 'codici', nome: 'Codici spediti', colore: 'var(--s2)' }], numero);
+    tabella('mm-ultimi', ['Email', 'Iscritto', 'Piano', 'PRO fino al', 'Dispositivi'], datiMM.ultimi.map(function (u) {
+      return [u.email, data(u.creatoIl), u.piano === 'pro' ? 'PRO' : 'Free', u.proFino ? data(u.proFino) : '—', numero(u.dispositivi)];
+    }), [0]);
+  }
+  $('carica-mm').addEventListener('click', caricaMM);
+
   function aggiornaTutto() {
+    /* Anche MAGOMARKET, se la sua chiave e' scritta (il browser la ricorda come password). */
+    if ($('chiave-mm').value.trim() !== '') caricaMM();
     if (chiave() === '') { $('stato-generale').textContent = 'Scrivi prima la tua chiave in alto.'; return; }
     var b = $('aggiorna'); b.disabled = true; b.classList.add('gira');
     animaProssimo = true;
