@@ -345,7 +345,7 @@
       <section style="--i:1" class="box c12" id="avviso-rinnovi" hidden><div class="avviso" id="avviso-rinnovi-testo"></div></section>
       <section style="--i:2" class="box c12">
         <div class="riga-titolo"><h2>Rinnovi automatici</h2><span class="sotto" style="margin:0" id="rn-primo"></span></div>
-        <p class="sotto">FUTMAGO Premium ed Elite. Previsti = andati a buon fine + rinnovo tolto + pagamento non riuscito. Un pagamento rifiutato e ritentato lo stesso giorno conta una volta.</p>
+        <p class="sotto">FUTMAGO Premium ed Elite. Un rinnovo conta una volta sola, anche se Stripe lo ritenta in giorni diversi: Riusciti = passato (anche a un tentativo successivo), In recupero = rifiutato ma Stripe sta ancora riprovando, Non riusciti = Stripe ha finito i tentativi.</p>
         <div class="tabella-wrap" id="tab-rinnovi-periodi"></div>
       </section>
       <section style="--i:3" class="box c6">
@@ -975,19 +975,20 @@
         $('avviso-rinnovi').hidden = true;
         $('rn-primo').textContent = rn.primoFutmago ? 'Primo abbonamento FUTMAGO: ' + data(rn.primoFutmago) : '';
         var SERV = { futmago: 'FUTMAGO', elite: 'Elite' };
-        var ESITO = { riuscito: '✅ Rinnovato', fallito: '❌ Non riuscito', disdetto: '🚫 Rinnovo tolto' };
-        tabella('tab-rinnovi-periodi', ['Periodo', 'Previsti', 'Riusciti', 'Rinnovo tolto', 'Non riusciti'], [
+        var ESITO = { riuscito: '✅ Rinnovato', fallito: '❌ Non riuscito', recupero: '⏳ In recupero', disdetto: '🚫 Rinnovo tolto' };
+        var tent = function (x) { return x.tentativi > 1 ? ' (' + x.tentativi + ' tentativi)' : ''; };
+        tabella('tab-rinnovi-periodi', ['Periodo', 'Previsti', 'Riusciti', 'In recupero', 'Rinnovo tolto', 'Non riusciti'], [
           ['Oggi', rn.oggi], ['Ultimi 7 giorni', rn.settimana], ['Ultimi 30 giorni', rn.mese]
-        ].map(function (x) { return [x[0], numero(x[1].previsti), numero(x[1].riusciti), numero(x[1].disdetti), numero(x[1].falliti)]; }), [0]);
+        ].map(function (x) { return [x[0], numero(x[1].previsti), numero(x[1].riusciti), numero(x[1].recupero || 0), numero(x[1].disdetti), numero(x[1].falliti)]; }), [0]);
         var orario = function (ms) { return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
-        tabella('tab-rinnovi-falliti', ['Quando', 'Servizio', 'Cliente', 'Motivo'], rn.elenco.filter(function (x) { return x.esito === 'fallito'; }).map(function (x) {
-          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', x.motivo || '—'];
+        tabella('tab-rinnovi-falliti', ['Quando', 'Servizio', 'Cliente', 'Motivo'], rn.elenco.filter(function (x) { return x.esito === 'fallito' || x.esito === 'recupero'; }).map(function (x) {
+          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', (x.esito === 'recupero' ? '⏳ ' : '❌ ') + (x.motivo || '—') + tent(x)];
         }), [0, 1, 2, 3]);
         tabella('tab-rinnovi-prossimi', ['Giorno', 'FUTMAGO', 'Elite'], rn.prossimi.map(function (g) {
           return [new Date(g.giorno + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' }), numero(g.futmago), numero(g.elite)];
         }), [0]);
         tabella('tab-rinnovi-elenco', ['Quando', 'Servizio', 'Cliente', 'Esito', 'Importo'], rn.elenco.map(function (x) {
-          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', ESITO[x.esito] + (x.motivo ? ' · ' + x.motivo : ''), x.importo ? euro(x.importo) : '—'];
+          return [orario(x.quando), SERV[x.servizio] || x.servizio, x.email || '—', ESITO[x.esito] + tent(x) + (x.motivo ? ' · ' + x.motivo : ''), x.importo ? euro(x.importo) : '—'];
         }), [0, 1, 2, 3]);
       }
     }
