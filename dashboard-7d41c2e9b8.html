@@ -217,6 +217,7 @@
       <section style="--i:2" class="box tessera c3"><div class="etichetta">Visti negli ultimi 7 giorni</div><div class="riga-num"><div class="numero attesa" id="f-visti7">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="f-visti-d">&nbsp;</div></section>
       <section style="--i:3" class="box tessera c3"><div class="etichetta">Dispositivi collegati</div><div class="riga-num"><div class="numero attesa" id="f-disp">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="f-disp-d">&nbsp;</div></section>
       <section style="--i:4" class="box tessera c3"><div class="etichetta">Free al limite (periodo)</div><div class="riga-num"><div class="numero attesa" id="f-limite">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="f-limite-d">&nbsp;</div></section>
+      <section style="--i:4" class="box tessera c3"><div class="etichetta">Club non letto (periodo)</div><div class="riga-num"><div class="numero attesa" id="f-guasti">—</div><svg class="scintilla" aria-hidden="true"></svg></div><div class="dettaglio" id="f-guasti-d">&nbsp;</div></section>
 
       <section style="--i:5" class="box c12" id="avviso-uso" hidden><div class="avviso"><strong>L'uso delle funzioni si conta dal giorno della pubblicazione del server aggiornato.</strong> Prima non veniva salvato: i giorni precedenti risultano vuoti. Si contano gli account (Free e Premium); chi usa FUTMAGO da ospite, senza account, no.</div></section>
 
@@ -948,6 +949,13 @@
       var totLim = 0; for (var kk in limiti) totLim += limiti[kk];
       mostraNumero('f-limite', alLimite, numeroIntero); scintilla('f-limite', u.slice(0, 14).map(function (d) { return d.personeAlLimite; }).reverse());
       $('f-limite-d').textContent = numero(totLim) + ' volte un Free arrivato al limite (somma dei giorni)';
+      /* Guasti che FUTMAGO segnala da solo (dal 20/11/2026): dispositivi col club letto a zero carte. */
+      var clubNo = function (d) { return d.guasti && d.guasti['club-non-letto'] ? d.guasti['club-non-letto'].n : 0; };
+      var totG = 0, perP = {};
+      u.forEach(function (d) { totG += clubNo(d); var g = d.guasti && d.guasti['club-non-letto']; if (g) for (var pp in g.piattaforme) perP[pp] = (perP[pp] || 0) + g.piattaforme[pp]; });
+      mostraNumero('f-guasti', totG, numeroIntero); scintilla('f-guasti', u.slice(0, 14).map(clubNo).reverse());
+      var nomiP = { iphone: 'iPhone', android: 'Android', pc: 'PC', altro: 'altro' };
+      $('f-guasti-d').textContent = totG === 0 ? 'Nessun dispositivo (si conta dal 20/11)' : Object.keys(perP).map(function (k) { return (nomiP[k] || k) + ' ' + numero(perP[k]); }).join(' · ') + ' (oggi ' + numero(u[0] ? clubNo(u[0]) : 0) + ')';
     }
     if (dati.elite) {
       var e = dati.elite, att = e.attivi.mensile + e.attivi.mini + e.attivi.season;
