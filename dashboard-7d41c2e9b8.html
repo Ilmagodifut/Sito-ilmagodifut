@@ -236,6 +236,18 @@
         <p class="sotto">Tutte le funzioni sommate, per giorno.</p>
         <div class="grafico" id="g-uso-giorni"></div>
       </section>
+      <section style="--i:8" class="box c12">
+        <div class="riga-titolo"><h2>Problemi degli utenti</h2><button class="link-tabella" data-tabella="g-guasti-giorni">Vedi tabella</button></div>
+        <p class="sotto">FUTMAGO li segnala da solo, in forma anonima (dal 20/11/2026): niente email né account EA. Un dispositivo conta una volta al giorno per tipo di problema.</p>
+        <div class="griglia" style="gap:12px">
+          <div class="c6 tessera box" style="--i:0"><div class="etichetta">Club non letto (periodo)</div><div class="numero" id="f-g-club">—</div><div class="dettaglio" id="f-g-club-d">FUTMAGO non è riuscito a leggere i giocatori del club</div></div>
+          <div class="c6 tessera box" style="--i:0"><div class="etichetta">SBC col mercato fallita (periodo)</div><div class="numero" id="f-g-mercato">—</div><div class="dettaglio" id="f-g-mercato-d">Nemmeno con le carte da comprare si arrivava a una rosa valida</div></div>
+        </div>
+        <div class="grafico" id="g-guasti-giorni" style="margin-top:14px"></div>
+        <h2 style="margin-top:18px">Ultimi casi</h2>
+        <p class="sotto">I più recenti per primi. «Club» = giocatori che FUTMAGO ha letto; «Caricamento» = come è andata la lettura del club da EA.</p>
+        <div class="tabella-wrap tabella-alta" id="tab-guasti"></div>
+      </section>
       <section style="--i:9" class="box c12">
         <div class="riga-titolo"><h2>Disdette</h2><span class="sotto" style="margin:0" id="f-disdette-n"></span></div>
         <p class="sotto">Mensili disdetti su Stripe: «ancora acceso» esce alla scadenza, «finito» è già tornato Free.</p>
@@ -957,6 +969,40 @@
       var nomiP = { iphone: 'iPhone', android: 'Android', pc: 'PC', altro: 'altro' };
       $('f-guasti-d').textContent = totG === 0 ? 'Nessun dispositivo (si conta dal 20/11)' : Object.keys(perP).map(function (k) { return (nomiP[k] || k) + ' ' + numero(perP[k]); }).join(' · ') + ' (oggi ' + numero(u[0] ? clubNo(u[0]) : 0) + ')';
     }
+    if (dati.guasti) {
+      /* I problemi segnalati da FUTMAGO (20/11/2026): vedi services/licenza/src/guasti.ts. */
+      var gg = dati.guasti.giorni.slice(0, giorni), totClub = 0, totMerc = 0;
+      gg.forEach(function (d) { totClub += d.tipi['club-non-letto'] || 0; totMerc += d.tipi['mercato-nessuna'] || 0; });
+      mostraNumero('f-g-club', totClub, numeroIntero);
+      mostraNumero('f-g-mercato', totMerc, numeroIntero);
+      colonneNelTempo('g-guasti-giorni', gg.slice().reverse().map(function (d) {
+        return { giorno: d.giorno, club: d.tipi['club-non-letto'] || 0, mercato: d.tipi['mercato-nessuna'] || 0 };
+      }), [{ chiave: 'club', nome: 'Club non letto', colore: 'var(--s2)' }, { chiave: 'mercato', nome: 'SBC col mercato fallita', colore: 'var(--s4)' }], numero);
+      var NOMI_G = { 'club-non-letto': 'Club non letto', 'mercato-nessuna': 'SBC col mercato fallita' };
+      var NOMI_P = { iphone: 'iPhone', android: 'Android', pc: 'PC', altro: 'altro' };
+      var NOMI_CAR = { 'caricato': 'caricato', 'gia-completo': 'già completo', 'fresco': 'appena fatto', 'totale-ignoto': 'EA non dà il totale', 'interrotto': 'interrotto (pagina fallita)', 'annullato': 'annullato', 'gia-in-corso': 'già in corso', 'nessuno': '—' };
+      var leggi = function (dd) { var o = {}; String(dd || '').split(' ').forEach(function (x) { var i = x.indexOf('='); if (i > 0) o[x.slice(0, i)] = x.slice(i + 1); }); return o; };
+      var giornoBreve = function (g, t) { var d = t ? new Date(t) : new Date(g + 'T12:00:00'); return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) + (t ? ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : ''); };
+      var sfida = function (v) {
+        if (!v) return '—';
+        var perSfida = {};
+        v.split(',').forEach(function (x) { var m = /^(\d+):r(\d+)/.exec(x); if (m) (perSfida[m[1]] = perSfida[m[1]] || []).push(Number(m[2]) + 1); });
+        var k = Object.keys(perSfida);
+        return k.length ? k.map(function (id) { return 'sfida ' + id + ', requisito ' + perSfida[id].join(' e '); }).join('; ') : v;
+      };
+      tabella('tab-guasti', ['Quando', 'Problema', 'Dispositivo', 'Club', 'Caricamento', 'Cosa non andava'], dati.guasti.ultimi.map(function (x) {
+        var d = leggi(x.d);
+        var car = x.tipo === 'club-non-letto' ? (NOMI_CAR[x.e] || x.e) : (d.l ? (NOMI_CAR[d.l] || d.l) + (d.b ? ' (' + d.b.replace('-', ' → ') + ' carte' + (d.a && d.a !== 'x' ? ' su ' + d.a : '') + ')' : '') : '—');
+        return [
+          giornoBreve(x.giorno, x.t),
+          NOMI_G[x.tipo] || x.tipo,
+          (NOMI_P[x.p] || x.p) + (x.v ? ' · ' + x.v : ''),
+          d.c ? d.c + ' carte' : (x.tipo === 'club-non-letto' ? '0' : '—'),
+          car,
+          x.tipo === 'mercato-nessuna' ? sfida(d.v) + (d.pos === '1' ? ' · posizioni rispettate' : '') : '—'
+        ];
+      }), [0, 1, 2, 4, 5]);
+    }
     if (dati.elite) {
       var e = dati.elite, att = e.attivi.mensile + e.attivi.mini + e.attivi.season;
       mostraNumero('t-elite', att, numeroIntero);
@@ -1144,6 +1190,7 @@
     var parti = [
       ['giorni', function (r) { dati.giorni = r.giorni; }],
       ['uso', function (r) { dati.uso = r.uso; }],
+      ['guasti', function (r) { dati.guasti = r.guasti; }],
       ['elite', function (r) { dati.elite = r.elite; }],
       ['incassi', function (r) { dati.incassi = r.incassi; }],
       ['rinnovi', function (r) { dati.rinnovi = r.rinnovi; }],
