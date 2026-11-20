@@ -30,7 +30,7 @@
     ilmagodifut.com/futmago
     ────────────────────────────────────────────────────────────── */
 
-fetch('https://ilmagodifut.com/futmago.js?v=0.7.22-80dc841b')
+fetch('https://ilmagodifut.com/futmago.js?v=0.7.22-b223f2ae')
   .then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.text();
