@@ -707,7 +707,21 @@
         if (griglia && griglia.parentNode) { griglia.parentNode.insertBefore(box, griglia); box.style.margin = '0 auto 1.4rem'; }
       }
       var tag = document.querySelector('.pricing-card.featured .pricing-tag');
-      if (tag) tag.textContent = 'Sconto Black Friday';
+      /* Accanto all'etichetta il tempo che resta (CHIESTO il 23/11). Finita la promo la pagina torna normale. */
+      if (tag) {
+        var due = function (n) { return (n < 10 ? '0' : '') + n; };
+        var batti = function () {
+          var resta = p.al - Date.now();
+          if (resta <= 0) { clearInterval(orologio); location.reload(); return; }
+          var sec = Math.floor(resta / 1000);
+          var g = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), x = sec % 60;
+          tag.textContent = 'Sconto Black Friday · ' + (g > 0 ? g + 'g ' : '') + due(h) + ':' + due(m) + ':' + due(x);
+        };
+        var orologio = setInterval(batti, 1000);
+        batti();
+        tag.style.fontVariantNumeric = 'tabular-nums';
+        tag.style.whiteSpace = 'nowrap';
+      }
       var creator = document.querySelector('[data-codice-attivo]');
       if (creator) creator.hidden = true;
     })
