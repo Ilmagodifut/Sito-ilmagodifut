@@ -201,6 +201,20 @@
           if (!p || !p.elite || Date.now() > p.al) return;
           sconta(LINK_MINI, p.elite.mini, p.elite.miniPieno, p.elite.codiceMini);
           sconta(LINK_PASS, p.elite.pass, p.elite.passPieno, p.elite.codicePass);
+          /*
+           * Le percentuali di risparmio si rifanno sui prezzi scontati (CHIESTO
+           * il 23/11), con la stessa regola di quelle scritte nella pagina:
+           * Mini contro 3 mesi di Mensile, Season contro 12 mesi, arrotondate.
+           */
+          var MENSILE_ELITE = 9.99;
+          var numero = function (t) { var m = String(t).match(/(\d+),(\d\d)/); return m ? Number(m[1] + '.' + m[2]) : 0; };
+          var cartaDi = function (link) { var a = document.querySelector('#promo a[href*="' + link + '"]'); return a && a.closest('.pricing-card'); };
+          var mini = numero(p.elite.mini), pass = numero(p.elite.pass);
+          var cMini = cartaDi(LINK_MINI), cPass = cartaDi(LINK_PASS);
+          var tagMini = cMini && cMini.querySelector('.pricing-tag');
+          if (tagMini && mini > 0) tagMini.textContent = Math.round((1 - mini / (MENSILE_ELITE * 3)) * 100) + '% di sconto';
+          var risparmio = cPass && cPass.querySelector('.pricing-savings');
+          if (risparmio && pass > 0) risparmio.textContent = 'Risparmi il ' + Math.round((1 - pass / (MENSILE_ELITE * 12)) * 100) + '% vs mensile';
           var box = document.querySelector('[data-promo-box]');
           var timer = box.querySelector('[data-promo-timer]');
           var due = function (n) { return (n < 10 ? '0' : '') + n; };

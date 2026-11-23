@@ -742,6 +742,10 @@
         var griglia = carta && carta.parentNode;
         if (griglia && griglia.parentNode) { griglia.parentNode.insertBefore(box, griglia); box.style.margin = '0 auto 1.4rem'; }
       }
+      /* Il risparmio sulla stagione si rifà sul prezzo scontato (CHIESTO il 23/11), stessa regola di sopra. */
+      var scontoEl = document.querySelector('[data-sconto]');
+      var mPass = String(p.pass).match(/(\d+),(\d\d)/);
+      if (scontoEl && mPass) scontoEl.textContent = '-' + Math.floor((1 - Number(mPass[1] + '.' + mPass[2]) / (5.99 * 11)) * 100) + '%';
       var creator = document.querySelector('[data-codice-attivo]');
       if (creator) creator.hidden = true;
     })
