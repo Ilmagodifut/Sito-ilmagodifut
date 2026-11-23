@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/futmago-icona-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Anton&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <!--
   LA PAGINA DEI PIANI, DENTRO IL SITO.
 
@@ -139,10 +139,25 @@
   .fm-codice-attivo { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; background: rgba(57,255,20,.07); border: 1px solid var(--green); border-radius: 12px; padding: .9rem 1.1rem; color: var(--text); font-size: .95rem; }
   .fm-codice-attivo[hidden] { display: none; }
   .fm-codice-spunta { color: var(--green); font-weight: 800; }
-  .fm-promo { flex-direction: column; align-items: flex-start; gap: .5rem; padding: 1.1rem 1.3rem; }
-  .fm-promo-testa { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-  .fm-promo-titolo { font-weight: 900; font-size: 1.45rem; letter-spacing: .04em; color: var(--green); line-height: 1.1; }
-  .fm-promo-timer { font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; color: #000; background: var(--green); border-radius: 8px; padding: .25rem .7rem; white-space: nowrap; }
+  /* La fascia del Black Friday (CHIESTA il 23/11): titolo grande al centro, timer a blocchi. */
+  .fm-promo { flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .9rem; padding: 1.4rem 1.3rem 1.5rem;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(57,255,20,.16), rgba(57,255,20,.03) 60%), #070a07;
+    box-shadow: 0 0 0 1px rgba(57,255,20,.25) inset, 0 0 36px rgba(57,255,20,.18); }
+  .fm-promo-titolo { font-family: 'Anton', 'Rajdhani', sans-serif; font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.9rem); line-height: 1; letter-spacing: .06em;
+    text-transform: uppercase; transform: skewX(-8deg);
+    background: linear-gradient(180deg, #ffffff 0%, #d9ffd0 35%, #39ff14 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 14px rgba(57,255,20,.45)); }
+  .fm-promo-timer { display: flex; gap: .55rem; justify-content: center; flex-wrap: nowrap; }
+  .fm-promo-blocco { min-width: 4.1rem; padding: .55rem .4rem .45rem; border-radius: 10px; background: linear-gradient(180deg, #0f1a0f, #050805);
+    border: 1px solid rgba(57,255,20,.45); box-shadow: 0 0 14px rgba(57,255,20,.22), inset 0 1px 0 rgba(255,255,255,.06); }
+  .fm-promo-num { display: block; font-family: 'Orbitron', 'Rajdhani', sans-serif; font-weight: 900; font-size: 1.75rem; line-height: 1; color: #39ff14;
+    font-variant-numeric: tabular-nums; text-shadow: 0 0 10px rgba(57,255,20,.7); }
+  .fm-promo-etichetta { display: block; margin-top: .35rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .68rem; letter-spacing: .18em; color: #9fb3a0; }
+  .fm-promo-sep { align-self: center; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.4rem; color: rgba(57,255,20,.6); margin-top: -1rem; }
+  .fm-promo-blocco.sec .fm-promo-num { animation: fm-batti 1s ease-in-out infinite; }
+  @keyframes fm-batti { 0%,100% { text-shadow: 0 0 10px rgba(57,255,20,.7); } 50% { text-shadow: 0 0 20px rgba(57,255,20,1), 0 0 2px #fff; } }
+  @media (prefers-reduced-motion: reduce) { .fm-promo-blocco.sec .fm-promo-num { animation: none; } }
+  @media (max-width: 480px) { .fm-promo-blocco { min-width: 3.3rem; } .fm-promo-num { font-size: 1.35rem; } .fm-promo-sep { display: none; } }
   .fm-codice-togli { margin-left: auto; background: none; border: 1px solid var(--border-dim); color: var(--text-muted); border-radius: 8px; padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .85rem; }
 
   .piani-note { display: grid; gap: .9rem; margin-top: 1.4rem; }
@@ -295,9 +310,15 @@
            promo questa fascia non compare piu', senza ripubblicare. -->
       <div class="fm-codice" data-promo-box hidden>
         <div class="fm-codice-attivo fm-promo">
-          <div class="fm-promo-testa">
-            <span class="fm-promo-titolo">SCONTO BLACK FRIDAY</span>
-            <span class="fm-promo-timer" data-promo-timer></span>
+          <span class="fm-promo-titolo">Sconto Black Friday</span>
+          <div class="fm-promo-timer" data-promo-timer>
+            <div class="fm-promo-blocco"><span class="fm-promo-num" data-t="g">0</span><span class="fm-promo-etichetta">GIORNI</span></div>
+            <span class="fm-promo-sep">:</span>
+            <div class="fm-promo-blocco"><span class="fm-promo-num" data-t="h">00</span><span class="fm-promo-etichetta">ORE</span></div>
+            <span class="fm-promo-sep">:</span>
+            <div class="fm-promo-blocco"><span class="fm-promo-num" data-t="m">00</span><span class="fm-promo-etichetta">MIN</span></div>
+            <span class="fm-promo-sep">:</span>
+            <div class="fm-promo-blocco sec"><span class="fm-promo-num" data-t="s">00</span><span class="fm-promo-etichetta">SEC</span></div>
           </div>
         </div>
       </div>
@@ -711,7 +732,8 @@
           if (resta <= 0) { clearInterval(orologio); location.reload(); return; }
           var sec = Math.floor(resta / 1000);
           var g = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), x = sec % 60;
-          timer.textContent = (g > 0 ? g + 'g ' : '') + due(h) + ':' + due(m) + ':' + due(x);
+          var metti = function (k, v) { var e = timer.querySelector('[data-t="' + k + '"]'); if (e && e.textContent !== v) e.textContent = v; };
+          metti('g', String(g)); metti('h', due(h)); metti('m', due(m)); metti('s', due(x));
         };
         orologio = setInterval(batti, 1000);
         batti();
