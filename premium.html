@@ -139,6 +139,10 @@
   .fm-codice-attivo { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; background: rgba(57,255,20,.07); border: 1px solid var(--green); border-radius: 12px; padding: .9rem 1.1rem; color: var(--text); font-size: .95rem; }
   .fm-codice-attivo[hidden] { display: none; }
   .fm-codice-spunta { color: var(--green); font-weight: 800; }
+  .fm-promo { flex-direction: column; align-items: flex-start; gap: .5rem; padding: 1.1rem 1.3rem; }
+  .fm-promo-testa { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .fm-promo-titolo { font-weight: 900; font-size: 1.45rem; letter-spacing: .04em; color: var(--green); line-height: 1.1; }
+  .fm-promo-timer { font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; color: #000; background: var(--green); border-radius: 8px; padding: .25rem .7rem; white-space: nowrap; }
   .fm-codice-togli { margin-left: auto; background: none; border: 1px solid var(--border-dim); color: var(--text-muted); border-radius: 8px; padding: .35rem .8rem; cursor: pointer; font: inherit; font-size: .85rem; }
 
   .piani-note { display: grid; gap: .9rem; margin-top: 1.4rem; }
@@ -290,9 +294,12 @@
            Date, prezzi e codici li decide il server (/v1/promo): finita la
            promo questa fascia non compare piu', senza ripubblicare. -->
       <div class="fm-codice" data-promo-box hidden>
-        <div class="fm-codice-attivo">
-          <span class="fm-codice-spunta">✓</span>
-          <span><b data-promo-titolo></b> fino al <b data-promo-fine></b>: <b>Mensile <span data-promo-mese></span> il primo mese</b> e <b>Stagione FC 27 a <span data-promo-pass></span></b>. Lo sconto si applica da solo al pagamento.</span>
+        <div class="fm-codice-attivo fm-promo">
+          <div class="fm-promo-testa">
+            <span class="fm-promo-titolo">SCONTO BLACK FRIDAY</span>
+            <span class="fm-promo-timer" data-promo-timer></span>
+          </div>
+          <span>Fino al <b data-promo-fine></b>: <b>Mensile <span data-promo-mese></span> il primo mese</b> e <b>Stagione FC 27 a <span data-promo-pass></span></b>. Lo sconto si applica da solo al pagamento.</span>
         </div>
       </div>
       <div class="fm-codice" data-codice-box>
@@ -696,31 +703,27 @@
       var fine = new Date(p.al + 3600000);
       var box = document.querySelector('[data-promo-box]');
       if (box) {
-        box.querySelector('[data-promo-titolo]').textContent = p.etichetta || String(p.titolo).replace(/\s+/g, ' ');
         box.querySelector('[data-promo-fine]').textContent = fine.getUTCDate() + ' ' + MESI[fine.getUTCMonth()];
         box.querySelector('[data-promo-mese]').textContent = p.mese;
         box.querySelector('[data-promo-pass]').textContent = p.pass;
         box.hidden = false;
-        /* In cima ai piani, non sotto: e' la prima cosa da vedere. */
-        var carta = document.querySelector('.pricing-card');
-        var griglia = carta && carta.parentNode;
-        if (griglia && griglia.parentNode) { griglia.parentNode.insertBefore(box, griglia); box.style.margin = '0 auto 1.4rem'; }
-      }
-      var tag = document.querySelector('.pricing-card.featured .pricing-tag');
-      /* Accanto all'etichetta il tempo che resta (CHIESTO il 23/11). Finita la promo la pagina torna normale. */
-      if (tag) {
+        /* Il tempo che resta, accanto al titolo (CHIESTO il 23/11). Finita la promo la pagina torna normale. */
+        var timer = box.querySelector('[data-promo-timer]');
         var due = function (n) { return (n < 10 ? '0' : '') + n; };
+        var orologio = 0;
         var batti = function () {
           var resta = p.al - Date.now();
           if (resta <= 0) { clearInterval(orologio); location.reload(); return; }
           var sec = Math.floor(resta / 1000);
           var g = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), x = sec % 60;
-          tag.textContent = 'Sconto Black Friday · ' + (g > 0 ? g + 'g ' : '') + due(h) + ':' + due(m) + ':' + due(x);
+          timer.textContent = (g > 0 ? g + 'g ' : '') + due(h) + ':' + due(m) + ':' + due(x);
         };
-        var orologio = setInterval(batti, 1000);
+        orologio = setInterval(batti, 1000);
         batti();
-        tag.style.fontVariantNumeric = 'tabular-nums';
-        tag.style.whiteSpace = 'nowrap';
+        /* In cima ai piani, non sotto: e' la prima cosa da vedere. */
+        var carta = document.querySelector('.pricing-card');
+        var griglia = carta && carta.parentNode;
+        if (griglia && griglia.parentNode) { griglia.parentNode.insertBefore(box, griglia); box.style.margin = '0 auto 1.4rem'; }
       }
       var creator = document.querySelector('[data-codice-attivo]');
       if (creator) creator.hidden = true;
