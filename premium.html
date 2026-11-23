@@ -299,7 +299,6 @@
             <span class="fm-promo-titolo">SCONTO BLACK FRIDAY</span>
             <span class="fm-promo-timer" data-promo-timer></span>
           </div>
-          <span>Fino al <b data-promo-fine></b>: <b>Mensile <span data-promo-mese></span> il primo mese</b> e <b>Stagione FC 27 a <span data-promo-pass></span></b>. Lo sconto si applica da solo al pagamento.</span>
         </div>
       </div>
       <div class="fm-codice" data-codice-box>
@@ -700,12 +699,8 @@
       if (pp) { pp.textContent = p.passPieno; pp.hidden = false; }
       var per = document.querySelector('[data-periodo-mese]');
       if (per) per.textContent = 'il primo mese, poi ' + p.mesePieno + ' al mese';
-      var fine = new Date(p.al + 3600000);
       var box = document.querySelector('[data-promo-box]');
       if (box) {
-        box.querySelector('[data-promo-fine]').textContent = fine.getUTCDate() + ' ' + MESI[fine.getUTCMonth()];
-        box.querySelector('[data-promo-mese]').textContent = p.mese;
-        box.querySelector('[data-promo-pass]').textContent = p.pass;
         box.hidden = false;
         /* Il tempo che resta, accanto al titolo (CHIESTO il 23/11). Finita la promo la pagina torna normale. */
         var timer = box.querySelector('[data-promo-timer]');
