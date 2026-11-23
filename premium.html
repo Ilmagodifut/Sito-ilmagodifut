@@ -286,6 +286,15 @@
            vuole una casella da riempire sulla pagina («non lo voglio il
            riquadro»). Il server dice di chi e' e quali sono i suoi due
            codici, uno per piano, e il pagamento parte con quello giusto. -->
+      <!-- ── LA PROMO A TEMPO (Black Friday, CHIESTO il 23/11/2026) ──────
+           Date, prezzi e codici li decide il server (/v1/promo): finita la
+           promo questa fascia non compare piu', senza ripubblicare. -->
+      <div class="fm-codice" data-promo-box hidden>
+        <div class="fm-codice-attivo">
+          <span class="fm-codice-spunta">✓</span>
+          <span><b data-promo-titolo></b> fino al <b data-promo-fine></b>: <b>Mensile <span data-promo-mese></span> il primo mese</b> e <b>Stagione FC 27 a <span data-promo-pass></span></b>. Lo sconto si applica da solo al pagamento.</span>
+        </div>
+      </div>
       <div class="fm-codice" data-codice-box>
         <div class="fm-codice-attivo" data-codice-attivo hidden>
           <span class="fm-codice-spunta">✓</span>
@@ -576,6 +585,8 @@
     if (el) el.innerHTML = intero + '<span class="cent">,' + cent + '</span><sup>€</sup>';
   }
   function mostra(dati) {
+    /* Durante una promo (Black Friday) vale la promo: e' piu' bassa del codice creator. */
+    if (window.fmPromoAttiva) return;
     ['mese', 'pass'].forEach(function (p) {
       var t = tasti[p];
       if (!t) return;
@@ -640,6 +651,67 @@
       .then(function (r) { if (r && r.ok) { ricorda(r.mese, r.nome); mostra(r); } })
       .catch(function () {});
   }
+})();
+</script>
+<script>
+/*
+ * ── LA PROMO A TEMPO (Black Friday, CHIESTO il 23/11/2026) ──────────────
+ *
+ * Se il server dice che c'e' una promo in corso, i due tasti partono con i
+ * suoi codici Stripe (prefilled_promo_code) e i prezzi diventano quelli
+ * scontati, col pieno barrato. Prevale sul codice creator. Server giu': prezzi
+ * pieni, come sempre.
+ */
+(function () {
+  var API = 'https://futmago-licenza.futmago-api.workers.dev';
+  var MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+  function conCodice(href, codice) {
+    href = String(href || '').replace(/[?&]prefilled_promo_code=[^&]*/, '');
+    if (href.indexOf('https://') !== 0 || !codice) return href;
+    return href + (href.indexOf('?') >= 0 ? '&' : '?') + 'prefilled_promo_code=' + encodeURIComponent(codice);
+  }
+  function prezzo(sel, testo) {
+    var el = document.querySelector(sel);
+    var m = String(testo).match(/(\d+),(\d\d)/);
+    if (el && m) el.innerHTML = m[1] + '<span class="cent">,' + m[2] + '</span><sup>€</sup>';
+  }
+  fetch(API + '/v1/promo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      var p = r && r.promo;
+      if (!p || Date.now() > p.al) return;
+      window.fmPromoAttiva = p;
+      var mese = document.querySelector('[data-paga-mese]');
+      var pass = document.querySelector('[data-paga-stagione]');
+      if (mese) mese.setAttribute('href', conCodice(mese.getAttribute('href'), p.codiceMese));
+      if (pass) pass.setAttribute('href', conCodice(pass.getAttribute('href'), p.codicePass));
+      prezzo('[data-prezzo-mese]', p.mese);
+      prezzo('[data-prezzo-pass]', p.pass);
+      var pm = document.querySelector('[data-prima-mese]');
+      var pp = document.querySelector('[data-prima-pass]');
+      if (pm) { pm.textContent = p.mesePieno; pm.hidden = false; }
+      if (pp) { pp.textContent = p.passPieno; pp.hidden = false; }
+      var per = document.querySelector('[data-periodo-mese]');
+      if (per) per.textContent = 'il primo mese, poi ' + p.mesePieno + ' al mese';
+      var fine = new Date(p.al + 3600000);
+      var box = document.querySelector('[data-promo-box]');
+      if (box) {
+        box.querySelector('[data-promo-titolo]').textContent = p.etichetta || String(p.titolo).replace(/\s+/g, ' ');
+        box.querySelector('[data-promo-fine]').textContent = fine.getUTCDate() + ' ' + MESI[fine.getUTCMonth()];
+        box.querySelector('[data-promo-mese]').textContent = p.mese;
+        box.querySelector('[data-promo-pass]').textContent = p.pass;
+        box.hidden = false;
+        /* In cima ai piani, non sotto: e' la prima cosa da vedere. */
+        var carta = document.querySelector('.pricing-card');
+        var griglia = carta && carta.parentNode;
+        if (griglia && griglia.parentNode) { griglia.parentNode.insertBefore(box, griglia); box.style.margin = '0 auto 1.4rem'; }
+      }
+      var tag = document.querySelector('.pricing-card.featured .pricing-tag');
+      if (tag) tag.textContent = 'Black Friday';
+      var creator = document.querySelector('[data-codice-attivo]');
+      if (creator) creator.hidden = true;
+    })
+    .catch(function () { /* server giu': prezzi pieni */ });
 })();
 </script>
 </body>
