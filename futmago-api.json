@@ -1,7 +1,7 @@
 {
   "version": 1,
   "api": "https://futmago-licenza.futmago-api.workers.dev",
-  "versione": "0.7.13",
+  "versione": "0.7.26",
   "negozi": {
     "chrome": "https://chromewebstore.google.com/detail/ncicbjhpjfmelcbfddbmgdhaaakmomin",
     "edge": "https://microsoftedge.microsoft.com/addons/detail/oaaifleojfmekdannihpillniajpgdmb",
